@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('cash', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->string('username', 12);
+            $table->string('username', 20);
             $table->string('transid', 50)->unique();
             $table->string('sender_number', 11);
             $table->decimal('amount', 10, 2);

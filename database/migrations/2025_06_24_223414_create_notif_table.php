@@ -14,7 +14,7 @@ return new class extends Migration {
     {
         Schema::create('notif', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->string('username', 12);
+            $table->string('username', 20);
             $table->text('message');
             $table->string('title', 100);
             $table->boolean('status')->default(false);

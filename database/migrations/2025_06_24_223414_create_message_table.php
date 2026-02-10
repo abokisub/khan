@@ -14,7 +14,7 @@ return new class extends Migration {
     {
         Schema::create('message', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->string('username', 12);
+            $table->string('username', 20);
             $table->string('transid', 50)->unique();
             $table->text('message');
             $table->decimal('amount', 15, 2)->default(0.00);

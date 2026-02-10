@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('bill', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->string('username', 12);
+            $table->string('username', 20);
             $table->string('transid', 50)->unique();
             $table->string('disco_name', 50);
             $table->string('meter_number', 20);

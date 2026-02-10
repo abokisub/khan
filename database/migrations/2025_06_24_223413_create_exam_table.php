@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('exam', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->string('username', 12);
+            $table->string('username', 20);
             $table->string('transid', 50)->unique();
             $table->string('exam_type', 50);
             $table->string('exam_number', 20);
