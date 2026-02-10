@@ -1005,7 +1005,6 @@ class TransactionCalculator extends Controller
             }
         }
 
-        $explode_url = explode(',', config('app.habukhan_app_key'));
         if (true) {
             if (!empty($token)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifyapptoken($token)]);

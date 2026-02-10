@@ -2739,8 +2739,9 @@ class SecureController extends Controller
     }
     public function DataPurchased(Request $request)
     {
-        $explode_url = explode(',', config('app.habukhan_app_key'));
-        if (!$request->headers->get('origin') || in_array($request->headers->get('origin'), $explode_url) || $request->headers->get('origin') === $request->getSchemeAndHttpHost()) {
+        $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
+        $origin = rtrim($request->headers->get('origin'), '/');
+        if (!$origin || in_array($origin, $allowed_urls) || $origin === rtrim($request->getSchemeAndHttpHost(), '/')) {
             if (!empty($request->id)) {
                 if (DB::table('user')->where(['id' => $this->verifytoken($request->id)])->count() == 1) {
                     $user = DB::table('user')->where(['id' => $this->verifytoken($request->id)])->first();
@@ -3198,8 +3199,9 @@ class SecureController extends Controller
     }
     public function ResetPassword(Request $request)
     {
-        $explode_url = explode(',', config('app.habukhan_app_key'));
-        if (!$request->headers->get('origin') || in_array($request->headers->get('origin'), $explode_url) || config('app.habukhan_device_key') == $request->header('Authorization')) {
+        $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
+        $origin = rtrim($request->headers->get('origin'), '/');
+        if (!$origin || in_array($origin, $allowed_urls) || config('app.habukhan_device_key') == $request->header('Authorization')) {
             $user_d = DB::table('user')->where(['status' => 1, 'email' => $request->email]);
             if ($user_d->count() == 1) {
                 $user = $user_d->first();
