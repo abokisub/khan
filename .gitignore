@@ -1,103 +1,20 @@
-# Ignore frontend (React)
+# Ignore frontend and mobile (large)
 frontend/
+Kobopoint\ Mobile/
 node_modules/
 
-# Ignore mobile app
-Kobopoint Mobile/
-
-# Laravel ignores
-/vendor
-/public/storage
-/storage/*.key
-/storage/*.log
-/storage/framework/*
-/storage/logs/*
+# Standard Laravel ignores (preserving only requested core files)
 .env
 .env.*
 .phpunit.result.cache
+public/storage
+storage/framework/cache/data/*
+storage/framework/sessions/*
+storage/framework/views/*
+storage/logs/*
 
-# System / IDE
+# IDE and OS
 .idea
 .vscode
 .DS_Store
-
-# Runtime / debug files
-public/debug_trace.txt
-public/message.txt
-
-# User generated files
-public/notifications/
-
-# Backups / dumps
-# scripts_backup/
-# *.json
-
-# Server / runtime
-public/error_log
-public/*.json
-public/uploads/
-public/upload/
-public/build/
-storage/
-images/
-
-# Apache
-
-# Runtime files
-public/error_log
-public/*.json
-public/build.zip
-webpack/
-resources/lang/lang/
-tests/Unit/Unit/
-app/Console/Console/
-app/Exceptions/Exceptions/
-database/factories/factories/
-database/migrations/migrations/
-
-# Random server files
-# *.php
-
-# Ignore server-specific runtime and temp files
-public/error_log
-public/response_h.json
-public/build.zip
-public/adex_error_css/json/json/
-public/adex_error_css/vendor/libs/shepherd/shepherd/
-public/txets.php
-public/xixapay_debug.txt
-
-# Ignore uploads (optional, if you handle uploads outside Git)
-public/uploads/
-public/upload/
-
-# Ignore node/build directories
-webpack/
-resources/lang/lang/
-tests/Unit/Unit/
-app/Console/Console/
-app/Exceptions/Exceptions/
-database/factories/factories/
-database/migrations/migrations/
-
-# Ignore random PHP temp files
-mpQ8zLZU.php
-txets.php
-wWZ2ddKe.php
-
-# Ignore robot file (if you don’t want in repo)
-robots.txt
-
-# Ignore layouts duplicates
-resources/views/layouts/layouts/
-
-
-# Ignore all .htaccess files
-**/.htaccess
-
-# Optional: ignore temp directories or test units
-tests/
-resources/views/layouts/.htaccess
-resources/lang/.htaccess
-public/assets/.htaccess
-public/adex_error_css/.htaccess
+Thumbs.db
