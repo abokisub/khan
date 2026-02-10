@@ -2757,25 +2757,26 @@ class SecureController extends Controller
                         ->get();
                     $total_gb = 0;
                     foreach ($data_purchase as $data) {
-                        $plans = $data->plan_name;
-                        $check_gb = substr($plans, -2);
-                        if ($check_gb == 'MB') {
-                            $mb = rtrim($plans, "MB");
-                            $gb = $mb / 1024;
-                        } elseif ($check_gb == 'GB') {
-                            $gb = rtrim($plans, "GB");
-                        } elseif ($check_gb == 'TB') {
-                            $tb = rtrim($plans, 'TB');
-                            $gb = ceil($tb * 1024);
-                        } else {
-                            $gb = 0;
+                        $plans = strtoupper($data->plan_name);
+                        // Extract number using regex for robustness
+                        if (preg_match('/(\d+(\.\d+)?)\s*(GB|MB|TB)/i', $plans, $matches)) {
+                            $value = (float) $matches[1];
+                            $unit = strtoupper($matches[3]);
+
+                            if ($unit === 'MB') {
+                                $total_gb += $value / 1024;
+                            } elseif ($unit === 'TB') {
+                                $total_gb += $value * 1024;
+                            } else {
+                                $total_gb += $value;
+                            }
                         }
-                        $total_gb += $gb;
                     }
+
                     if ($total_gb >= 1024) {
-                        $calculate_gb = $total_gb / 1024 . 'TB';
+                        $calculate_gb = round($total_gb / 1024, 2) . 'TB';
                     } else {
-                        $calculate_gb = $total_gb . 'GB';
+                        $calculate_gb = round($total_gb, 2) . 'GB';
                     }
                     return response()->json([
                         'status' => 'success',
