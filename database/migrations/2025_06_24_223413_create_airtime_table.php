@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      *
@@ -18,12 +17,15 @@ return new class extends Migration
             $table->string('username', 20);
             $table->string('transid', 50)->unique();
             $table->string('network', 20);
+            $table->string('network_type', 50)->nullable();
             $table->string('phone', 11);
             $table->decimal('amount', 10, 2);
             $table->decimal('discount', 10, 2)->default(0.00);
+            $table->decimal('oldbal', 10, 2)->default(0.00);
             $table->decimal('newbal', 10, 2);
             $table->enum('plan_status', ['0', '1', '2'])->default(0);
             $table->timestamp('date');
+            $table->timestamp('plan_date')->nullable();
             $table->string('type', 20)->default('VTU');
         });
     }
