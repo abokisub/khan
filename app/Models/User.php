@@ -55,6 +55,11 @@ class User extends Authenticatable
         'habukhan_key',
         'kyc_documents',
 
+        'paymentpoint_account_number',
+        'paymentpoint_account_name',
+        'paymentpoint_bank_name',
+        'paymentpoint_customer_id',
+        'paymentpoint_reserved_id',
     ];
 
     /**

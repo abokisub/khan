@@ -299,6 +299,7 @@ class AuthController extends Controller
                         $xixapay_enabled = $settings->xixapay_enabled ?? true;
                         // Palmpay is separate
                         $palmpay_enabled = $settings->palmpay_enabled ?? true;
+                        $paymentpoint_enabled = $settings->paymentpoint_enabled ?? true;
                         $default_virtual_account = $settings->default_virtual_account ?? 'palmpay';
                         $default_virtual_account = ($default_virtual_account == 'palmpay') ? 'xixapay' : $default_virtual_account; // Migration for name change if needed
                     } catch (\Exception $e) {
@@ -319,6 +320,8 @@ class AuthController extends Controller
                         $active_default = null;
                     if ($active_default == 'palmpay' && !$palmpay_enabled)
                         $active_default = null;
+                    if ($active_default == 'paymentpoint' && !$paymentpoint_enabled)
+                        $active_default = null;
 
                     if ($active_default == null) {
                         if ($palmpay_enabled)
@@ -329,6 +332,8 @@ class AuthController extends Controller
                             $active_default = 'monnify';
                         elseif ($xixapay_enabled)
                             $active_default = 'xixapay';
+                        elseif ($paymentpoint_enabled)
+                            $active_default = 'paymentpoint';
                     }
 
                     try {
@@ -346,10 +351,10 @@ class AuthController extends Controller
                     }
 
                     try {
-                        if ($palmpay_enabled && ($user->palmpay == null || $user->opay == null))
+                        if ($paymentpoint_enabled && $user->paymentpoint_account_number == null)
                             $this->paymentpoint_account($user->username);
                     } catch (\Exception $e) {
-                        \Log::error("Account PaymentPoint: " . $e->getMessage());
+                         \Log::error("Account PaymentPoint: " . $e->getMessage());
                     }
 
                     try {
@@ -386,16 +391,22 @@ class AuthController extends Controller
                             ($active_default == 'wema') ? $user->paystack_account :
                             (($active_default == 'monnify') ? $moniepoint_acc :
                                 (($active_default == 'xixapay') ? $user->palmpay :
-                                    null))
+                                    (($active_default == 'paymentpoint') ? $user->paymentpoint_account_number :
+                                    null)))
                         ),
 
                         // Keep Paystack independent or link to another setting if needed
                         'bank_name' => ($monnify_enabled && !empty($moniepoint_acc)) ? 'Moniepoint' : (
-                            ($active_default == 'wema') ? 'Wema Bank' :
+                            (($active_default == 'wema') ? 'Wema Bank' :
                             (($active_default == 'monnify') ? 'Moniepoint' :
                                 (($active_default == 'xixapay') ? 'PalmPay' :
-                                    'PalmPay'))
+                                    (($active_default == 'paymentpoint') ? 'PaymentPoint' :
+                                    'PalmPay'))))
                         ),
+                        
+                        'paymentpoint_account_number' => $user->paymentpoint_account_number,
+                        'paymentpoint_account_name' => $user->paymentpoint_account_name,
+                        'paymentpoint_bank_name' => $user->paymentpoint_bank_name,
 
                         'paystack_account' => $user->paystack_account,
                         'paystack_bank' => $user->paystack_bank,

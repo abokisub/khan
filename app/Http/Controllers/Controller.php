@@ -426,8 +426,25 @@ class Controller extends BaseController
 
     public function paymentpoint_account($username)
     {
-        // DISABLED: As per user request to avoid slowdowns and duplicates
-        return;
+        try {
+            $user = DB::table('user')->where('username', $username)->first();
+
+            if ($user && empty($user->paymentpoint_account_number)) {
+                // Check cooldown
+                $cacheKey = "paymentpoint_sync_" . $user->id;
+                if (\Cache::has($cacheKey)) {
+                    return;
+                }
+
+                $service = new \App\Services\PaymentPointService(); // Use full namespace or import
+                $service->createVirtualAccount(json_decode(json_encode($user), false)); // Pass object
+
+                // Set cooldown
+                \Cache::put($cacheKey, 'attempted', 10);
+            }
+        } catch (\Exception $e) {
+            \Log::error("PaymentPoint Account Error: " . $e->getMessage());
+        }
     }
     public function system_date()
     {
