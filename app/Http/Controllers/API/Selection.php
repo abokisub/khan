@@ -12,7 +12,7 @@ class Selection extends Controller
     {
         $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
         $origin = rtrim($request->headers->get('origin'), '/');
-        if (!$origin || in_array($origin, $allowed_urls)) {
+        if (!$origin || in_array($origin, $allowed_urls) || $origin === rtrim($request->getSchemeAndHttpHost(), "/")) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN');
@@ -74,7 +74,7 @@ class Selection extends Controller
     {
         $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
         $origin = rtrim($request->headers->get('origin'), '/');
-        if (!$origin || in_array($origin, $allowed_urls)) {
+        if (!$origin || in_array($origin, $allowed_urls) || $origin === rtrim($request->getSchemeAndHttpHost(), "/")) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN');
@@ -111,7 +111,7 @@ class Selection extends Controller
     {
         $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
         $origin = rtrim($request->headers->get('origin'), '/');
-        if (!$origin || in_array($origin, $allowed_urls)) {
+        if (!$origin || in_array($origin, $allowed_urls) || $origin === rtrim($request->getSchemeAndHttpHost(), "/")) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN');
@@ -148,7 +148,7 @@ class Selection extends Controller
     {
         $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
         $origin = rtrim($request->headers->get('origin'), '/');
-        if (!$origin || in_array($origin, $allowed_urls)) {
+        if (!$origin || in_array($origin, $allowed_urls) || $origin === rtrim($request->getSchemeAndHttpHost(), "/")) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN');
@@ -185,7 +185,7 @@ class Selection extends Controller
     {
         $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
         $origin = rtrim($request->headers->get('origin'), '/');
-        if (!$origin || in_array($origin, $allowed_urls)) {
+        if (!$origin || in_array($origin, $allowed_urls) || $origin === rtrim($request->getSchemeAndHttpHost(), "/")) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN');
@@ -222,7 +222,7 @@ class Selection extends Controller
     {
         $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
         $origin = rtrim($request->headers->get('origin'), '/');
-        if (!$origin || in_array($origin, $allowed_urls)) {
+        if (!$origin || in_array($origin, $allowed_urls) || $origin === rtrim($request->getSchemeAndHttpHost(), "/")) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN');
@@ -259,7 +259,7 @@ class Selection extends Controller
     {
         $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
         $origin = rtrim($request->headers->get('origin'), '/');
-        if (!$origin || in_array($origin, $allowed_urls)) {
+        if (!$origin || in_array($origin, $allowed_urls) || $origin === rtrim($request->getSchemeAndHttpHost(), "/")) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN');
@@ -297,7 +297,7 @@ class Selection extends Controller
     {
         $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
         $origin = rtrim($request->headers->get('origin'), '/');
-        if (!$origin || in_array($origin, $allowed_urls)) {
+        if (!$origin || in_array($origin, $allowed_urls) || $origin === rtrim($request->getSchemeAndHttpHost(), "/")) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN');
@@ -334,7 +334,7 @@ class Selection extends Controller
     {
         $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
         $origin = rtrim($request->headers->get('origin'), '/');
-        if (!$origin || in_array($origin, $allowed_urls)) {
+        if (!$origin || in_array($origin, $allowed_urls) || $origin === rtrim($request->getSchemeAndHttpHost(), "/")) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN');
@@ -371,7 +371,7 @@ class Selection extends Controller
     {
         $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
         $origin = rtrim($request->headers->get('origin'), '/');
-        if (!$origin || in_array($origin, $allowed_urls)) {
+        if (!$origin || in_array($origin, $allowed_urls) || $origin === rtrim($request->getSchemeAndHttpHost(), "/")) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN');

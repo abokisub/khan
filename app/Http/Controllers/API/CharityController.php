@@ -18,7 +18,7 @@ class CharityController extends Controller
     {
         $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
         $origin = rtrim($request->headers->get('origin'), '/');
-        if (!$origin || in_array($origin, $allowed_urls)) {
+        if (!$origin || in_array($origin, $allowed_urls) || $origin === rtrim($request->getSchemeAndHttpHost(), "/")) {
             $user_id = $this->verifytoken($request->id);
             if ($user_id) {
                 $check_admin = DB::table('user')->where(['id' => $user_id, 'type' => 'ADMIN'])->first();
@@ -48,7 +48,7 @@ class CharityController extends Controller
     {
         $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
         $origin = rtrim($request->headers->get('origin'), '/');
-        if (!$origin || in_array($origin, $allowed_urls)) {
+        if (!$origin || in_array($origin, $allowed_urls) || $origin === rtrim($request->getSchemeAndHttpHost(), "/")) {
             $user_id = $this->verifytoken($request->id);
             if ($user_id) {
                 $check_admin = DB::table('user')->where(['id' => $user_id, 'type' => 'ADMIN'])->first();
@@ -118,7 +118,7 @@ class CharityController extends Controller
     {
         $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
         $origin = rtrim($request->headers->get('origin'), '/');
-        if (!$origin || in_array($origin, $allowed_urls)) {
+        if (!$origin || in_array($origin, $allowed_urls) || $origin === rtrim($request->getSchemeAndHttpHost(), "/")) {
             $user_id = $this->verifytoken($request->id);
             if ($user_id) {
                 $check_admin = DB::table('user')->where(['id' => $user_id, 'type' => 'ADMIN'])->first();
@@ -183,7 +183,7 @@ class CharityController extends Controller
     {
         $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
         $origin = rtrim($request->headers->get('origin'), '/');
-        if (!$origin || in_array($origin, $allowed_urls)) {
+        if (!$origin || in_array($origin, $allowed_urls) || $origin === rtrim($request->getSchemeAndHttpHost(), "/")) {
             $user_id = $this->verifytoken($request->id);
             if ($user_id) {
                 $check_admin = DB::table('user')->where(['id' => $user_id, 'type' => 'ADMIN'])->first();
@@ -497,7 +497,7 @@ class CharityController extends Controller
     {
         $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
         $origin = rtrim($request->headers->get('origin'), '/');
-        if (!$origin || in_array($origin, $allowed_urls)) {
+        if (!$origin || in_array($origin, $allowed_urls) || $origin === rtrim($request->getSchemeAndHttpHost(), "/")) {
             $user_id = $this->verifytoken($request->id);
             if ($user_id) {
                 // Check if admin or just a valid call
@@ -578,7 +578,7 @@ class CharityController extends Controller
     {
         $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
         $origin = rtrim($request->headers->get('origin'), '/');
-        if (!$origin || in_array($origin, $allowed_urls)) {
+        if (!$origin || in_array($origin, $allowed_urls) || $origin === rtrim($request->getSchemeAndHttpHost(), "/")) {
             $user_id = $this->verifytoken($request->id);
             if ($user_id) {
                 $check_admin = DB::table('user')->where(['id' => $user_id, 'type' => 'ADMIN'])->first();
@@ -620,7 +620,7 @@ class CharityController extends Controller
     {
         $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
         $origin = rtrim($request->headers->get('origin'), '/');
-        if (!$origin || in_array($origin, $allowed_urls)) {
+        if (!$origin || in_array($origin, $allowed_urls) || $origin === rtrim($request->getSchemeAndHttpHost(), "/")) {
             $user_id = $this->verifytoken($request->id);
             if ($user_id) {
                 $check_admin = DB::table('user')->where(['id' => $user_id, 'type' => 'ADMIN'])->first();
@@ -651,7 +651,7 @@ class CharityController extends Controller
     {
         $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
         $origin = rtrim($request->headers->get('origin'), '/');
-        if (!$origin || in_array($origin, $allowed_urls)) {
+        if (!$origin || in_array($origin, $allowed_urls) || $origin === rtrim($request->getSchemeAndHttpHost(), "/")) {
             $user_id = $this->verifytoken($request->id);
             if ($user_id) {
                 $check_admin = DB::table('user')->where(['id' => $user_id, 'type' => 'ADMIN'])->first();

@@ -154,7 +154,7 @@ class PaymentController extends Controller
     {
         $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
         $origin = rtrim($request->headers->get('origin'), '/');
-        if (!$origin || in_array($origin, $allowed_urls)) {
+        if (!$origin || in_array($origin, $allowed_urls) || $origin === rtrim($request->getSchemeAndHttpHost(), "/")) {
             if (DB::table('user')->where(['id' => $this->verifytoken($request->id), 'status' => 1])->count() == 1) {
                 $user = DB::table('user')->where(['id' => $this->verifytoken($request->id), 'status' => 1])->first();
                 $main_validator = validator::make($request->all(), [
@@ -233,7 +233,7 @@ class PaymentController extends Controller
     {
         $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
         $origin = rtrim($request->headers->get('origin'), '/');
-        if (!$origin || in_array($origin, $allowed_urls)) {
+        if (!$origin || in_array($origin, $allowed_urls) || $origin === rtrim($request->getSchemeAndHttpHost(), "/")) {
             if (DB::table('user')->where(['id' => $this->verifytoken($request->id), 'status' => 1])->count() == 1) {
                 $user = DB::table('user')->where(['id' => $this->verifytoken($request->id), 'status' => 1])->first();
                 $habukhan_key = DB::table('habukhan_key')->first();
@@ -592,7 +592,7 @@ class PaymentController extends Controller
     {
         $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
         $origin = rtrim($request->headers->get('origin'), '/');
-        if (!$origin || in_array($origin, $allowed_urls)) {
+        if (!$origin || in_array($origin, $allowed_urls) || $origin === rtrim($request->getSchemeAndHttpHost(), "/")) {
             if (DB::table('user')->where(['id' => $this->verifytoken($request->id), 'status' => 1])->count() == 1) {
                 $user = DB::table('user')->where(['id' => $this->verifytoken($request->id), 'status' => 1])->first();
                 $habukhan_key = DB::table('habukhan_key')->first();

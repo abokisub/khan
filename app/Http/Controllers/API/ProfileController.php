@@ -18,7 +18,7 @@ class ProfileController extends Controller
     {
         $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
         $origin = rtrim($request->headers->get('origin'), '/');
-        if (!$origin || in_array($origin, $allowed_urls)) {
+        if (!$origin || in_array($origin, $allowed_urls) || $origin === rtrim($request->getSchemeAndHttpHost(), "/")) {
             $user = DB::table('user')->where('id', $request->user()->id)->first();
 
             if (!$user) {

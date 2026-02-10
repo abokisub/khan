@@ -13,7 +13,7 @@ class Trans extends Controller
     {
         $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
         $origin = rtrim($request->headers->get('origin'), '/');
-        if (!$origin || in_array($origin, $allowed_urls)) {
+        if (!$origin || in_array($origin, $allowed_urls) || $origin === rtrim($request->getSchemeAndHttpHost(), "/")) {
             if (DB::table('user')->where(['id' => $this->verifytoken($request->id), 'status' => 1])->count() == 1) {
                 $user = DB::table('user')->where(['id' => $this->verifytoken($request->id), 'status' => 1])->first();
                 $search = strtolower($request->search);
@@ -237,7 +237,7 @@ class Trans extends Controller
     {
         $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
         $origin = rtrim($request->headers->get('origin'), '/');
-        if (!$origin || in_array($origin, $allowed_urls)) {
+        if (!$origin || in_array($origin, $allowed_urls) || $origin === rtrim($request->getSchemeAndHttpHost(), "/")) {
             if (DB::table('user')->where(['id' => $this->verifytoken($request->id), 'status' => 1])->count() == 1) {
                 $user = DB::table('user')->where(['id' => $this->verifytoken($request->id), 'status' => 1])->first();
                 $search = strtolower($request->search);
@@ -284,7 +284,7 @@ class Trans extends Controller
     {
         $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
         $origin = rtrim($request->headers->get('origin'), '/');
-        if (!$origin || in_array($origin, $allowed_urls)) {
+        if (!$origin || in_array($origin, $allowed_urls) || $origin === rtrim($request->getSchemeAndHttpHost(), "/")) {
             if (DB::table('user')->where(['id' => $this->verifytoken($request->id), 'status' => 1])->count() == 1) {
                 $user = DB::table('user')->where(['id' => $this->verifytoken($request->id), 'status' => 1])->first();
                 if (!$request->has('status') || $request->status == 'null' || empty($request->status)) {
@@ -333,7 +333,7 @@ class Trans extends Controller
     {
         $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
         $origin = rtrim($request->headers->get('origin'), '/');
-        if (!$origin || in_array($origin, $allowed_urls)) {
+        if (!$origin || in_array($origin, $allowed_urls) || $origin === rtrim($request->getSchemeAndHttpHost(), "/")) {
             if (DB::table('user')->where(['id' => $this->verifytoken($request->id), 'status' => 1])->count() == 1) {
                 $user = DB::table('user')->where(['id' => $this->verifytoken($request->id), 'status' => 1])->first();
                 $search = strtolower($request->search);
@@ -379,7 +379,7 @@ class Trans extends Controller
     {
         $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
         $origin = rtrim($request->headers->get('origin'), '/');
-        if (!$origin || in_array($origin, $allowed_urls)) {
+        if (!$origin || in_array($origin, $allowed_urls) || $origin === rtrim($request->getSchemeAndHttpHost(), "/")) {
             if (DB::table('user')->where(['id' => $this->verifytoken($request->id), 'status' => 1])->count() == 1) {
                 $user = DB::table('user')->where(['id' => $this->verifytoken($request->id), 'status' => 1])->first();
                 $search = strtolower($request->search);
@@ -427,7 +427,7 @@ class Trans extends Controller
     {
         $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
         $origin = rtrim($request->headers->get('origin'), '/');
-        if (!$origin || in_array($origin, $allowed_urls)) {
+        if (!$origin || in_array($origin, $allowed_urls) || $origin === rtrim($request->getSchemeAndHttpHost(), "/")) {
             if (DB::table('user')->where(['id' => $this->verifytoken($request->id), 'status' => 1])->count() == 1) {
                 $user = DB::table('user')->where(['id' => $this->verifytoken($request->id), 'status' => 1])->first();
                 $search = strtolower($request->search);
@@ -475,7 +475,7 @@ class Trans extends Controller
     {
         $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
         $origin = rtrim($request->headers->get('origin'), '/');
-        if (!$origin || in_array($origin, $allowed_urls)) {
+        if (!$origin || in_array($origin, $allowed_urls) || $origin === rtrim($request->getSchemeAndHttpHost(), "/")) {
             if (DB::table('user')->where(['id' => $this->verifytoken($request->id), 'status' => 1])->count() == 1) {
                 $user = DB::table('user')->where(['id' => $this->verifytoken($request->id), 'status' => 1])->first();
                 $search = strtolower($request->search);
@@ -523,7 +523,7 @@ class Trans extends Controller
     {
         $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
         $origin = rtrim($request->headers->get('origin'), '/');
-        if (!$origin || in_array($origin, $allowed_urls)) {
+        if (!$origin || in_array($origin, $allowed_urls) || $origin === rtrim($request->getSchemeAndHttpHost(), "/")) {
             if (DB::table('user')->where(['id' => $this->verifytoken($request->id), 'status' => 1])->count() == 1) {
                 $user = DB::table('user')->where(['id' => $this->verifytoken($request->id), 'status' => 1])->first();
                 $search = strtolower($request->search);
@@ -571,7 +571,7 @@ class Trans extends Controller
     {
         $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
         $origin = rtrim($request->headers->get('origin'), '/');
-        if (!$origin || in_array($origin, $allowed_urls)) {
+        if (!$origin || in_array($origin, $allowed_urls) || $origin === rtrim($request->getSchemeAndHttpHost(), "/")) {
             if (DB::table('user')->where(['id' => $this->verifytoken($request->id), 'status' => 1])->count() == 1) {
                 $user = DB::table('user')->where(['id' => $this->verifytoken($request->id), 'status' => 1])->first();
                 $search = strtolower($request->search);
@@ -755,7 +755,7 @@ class Trans extends Controller
     {
         $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
         $origin = rtrim($request->headers->get('origin'), '/');
-        if (!$origin || in_array($origin, $allowed_urls)) {
+        if (!$origin || in_array($origin, $allowed_urls) || $origin === rtrim($request->getSchemeAndHttpHost(), "/")) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)]);
                 if ($check_user->count() > 0) {

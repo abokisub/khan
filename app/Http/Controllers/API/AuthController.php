@@ -19,7 +19,7 @@ class AuthController extends Controller
         ignore_user_abort(true); // Continue processing even if user disconnects
         $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
         $origin = rtrim($request->headers->get('origin'), '/');
-        if (!$origin || in_array($origin, $allowed_urls)) {
+        if (!$origin || in_array($origin, $allowed_urls) || $origin === rtrim($request->getSchemeAndHttpHost(), '/')) {
             $validator = validator::make($request->all(), [
                 'name' => 'required|max:199|min:3',
                 'email' => 'required|unique:user,email|max:255|email',
@@ -273,7 +273,7 @@ class AuthController extends Controller
     {
         $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
         $origin = rtrim($request->headers->get('origin'), '/');
-        if (!$origin || in_array($origin, $allowed_urls)) {
+        if (!$origin || in_array($origin, $allowed_urls) || $origin === rtrim($request->getSchemeAndHttpHost(), "/")) {
             $user_token = $request->id;
             $real_token = $this->verifytoken($user_token);
             if (!is_null($real_token)) {
@@ -466,7 +466,7 @@ class AuthController extends Controller
     {
         $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
         $origin = rtrim($request->headers->get('origin'), '/');
-        if (!$origin || in_array($origin, $allowed_urls)) {
+        if (!$origin || in_array($origin, $allowed_urls) || $origin === rtrim($request->getSchemeAndHttpHost(), "/")) {
             $habukhan_check = DB::table('user')->where('email', $request->email);
             if ($habukhan_check->count() == 1) {
                 $user = $habukhan_check->get()[0];
@@ -626,7 +626,7 @@ class AuthController extends Controller
     {
         $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
         $origin = rtrim($request->headers->get('origin'), '/');
-        if (!$origin || in_array($origin, $allowed_urls)) {
+        if (!$origin || in_array($origin, $allowed_urls) || $origin === rtrim($request->getSchemeAndHttpHost(), '/')) {
             try {
                 //our login function over here
                 \Log::info('API Login Hit: ' . json_encode($request->except('password')));
@@ -871,7 +871,7 @@ class AuthController extends Controller
     {
         $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
         $origin = rtrim($request->headers->get('origin'), '/');
-        if (!$origin || in_array($origin, $allowed_urls)) {
+        if (!$origin || in_array($origin, $allowed_urls) || $origin === rtrim($request->getSchemeAndHttpHost(), "/")) {
             if (isset($request->id)) {
                 $sel_user = DB::table('user')->where('email', $request->id);
                 if ($sel_user->count() == 1) {
