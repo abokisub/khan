@@ -117,6 +117,7 @@ Route::post('/secure/selection/virtualaccounts/{id}/habukhan/secure', [AdminCont
 Route::get('/secure/virtualaccounts/locks/{id}/habukhan/secure', [App\Http\Controllers\API\VirtualAccountLockController::class, 'getLocks']);
 Route::post('/secure/virtualaccounts/locks/toggle/{id}/habukhan/secure', [App\Http\Controllers\API\VirtualAccountLockController::class, 'toggleLock']);
 Route::post('/secure/virtualaccounts/locks/update/{id}/habukhan/secure', [App\Http\Controllers\API\VirtualAccountLockController::class, 'updateLock']);
+Route::post('/secure/virtualaccounts/locks/reorder/{id}/habukhan/secure', [App\Http\Controllers\API\VirtualAccountLockController::class, 'reorderLocks']);
 
 // System Lock Check (Admin)
 Route::get('system/lock/{feature}', [AuthController::class, 'CheckSystemLock']);

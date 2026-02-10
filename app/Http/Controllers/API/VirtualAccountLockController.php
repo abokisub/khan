@@ -18,9 +18,10 @@ class VirtualAccountLockController extends Controller
     public function getLocks(Request $request)
     {
         try {
+            // Fetch locks sorted by sort_order
             $locks = DB::table('virtual_account_locks')
-                ->orderBy('provider')
-                ->orderBy('account_type')
+                ->orderBy('sort_order', 'asc')
+                ->orderBy('id', 'asc')
                 ->get();
 
             return response()->json([
@@ -137,4 +138,48 @@ class VirtualAccountLockController extends Controller
             ], 500);
         }
     }
+    /**
+     * Reorder virtual account providers
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function reorderLocks(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'locks' => 'required|array',
+            'locks.*.provider' => 'required|string',
+            'locks.*.account_type' => 'required|string',
+            'locks.*.sort_order' => 'required|integer',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $validator->errors()->first()
+            ], 400);
+        }
+
+        try {
+            DB::transaction(function () use ($request) {
+                foreach ($request->locks as $lock) {
+                    DB::table('virtual_account_locks')
+                        ->where('provider', $lock['provider'])
+                        ->where('account_type', $lock['account_type'])
+                        ->update(['sort_order' => $lock['sort_order']]);
+                }
+            });
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Virtual account provider order updated successfully'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to update order: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }
+
