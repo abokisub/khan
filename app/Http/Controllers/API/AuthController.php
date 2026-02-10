@@ -17,9 +17,8 @@ class AuthController extends Controller
     {
         set_time_limit(300); // Increased time limit
         ignore_user_abort(true); // Continue processing even if user disconnects
-        $explode_url = explode(',', config('app.habukhan_app_key'));
         $origin = $request->headers->get('origin');
-        if (!$origin || in_array($origin, $explode_url)) {
+        if ($this->isValidOrigin($request)) {
             $validator = validator::make($request->all(), [
                 'name' => 'required|max:199|min:3',
                 'email' => 'required|unique:user,email|max:255|email',
@@ -271,15 +270,12 @@ class AuthController extends Controller
     }
     public function account(Request $request)
     {
-        $explode_url = explode(',', config('app.habukhan_app_key'));
-        $origin = $request->headers->get('origin');
-        if (!$origin || in_array($origin, $explode_url)) {
+        if ($this->isValidOrigin($request)) {
             $user_token = $request->id;
             $real_token = $this->verifytoken($user_token);
             if (!is_null($real_token)) {
-                $habukhan_check = DB::table('user')->where('id', $real_token);
-                if ($habukhan_check->count() == 1) {
-                    $user = $habukhan_check->get()[0];
+                $user = User::find($real_token);
+                if ($user) {
                     // Fetch settings to check enabled providers
                     try {
                         $settings = DB::table('settings')->select(
@@ -354,7 +350,7 @@ class AuthController extends Controller
                         if ($paymentpoint_enabled && $user->paymentpoint_account_number == null)
                             $this->paymentpoint_account($user->username);
                     } catch (\Exception $e) {
-                         \Log::error("Account PaymentPoint: " . $e->getMessage());
+                        \Log::error("Account PaymentPoint: " . $e->getMessage());
                     }
 
                     try {
@@ -392,18 +388,18 @@ class AuthController extends Controller
                             (($active_default == 'monnify') ? $moniepoint_acc :
                                 (($active_default == 'xixapay') ? $user->palmpay :
                                     (($active_default == 'paymentpoint') ? $user->paymentpoint_account_number :
-                                    null)))
+                                        null)))
                         ),
 
                         // Keep Paystack independent or link to another setting if needed
                         'bank_name' => ($monnify_enabled && !empty($moniepoint_acc)) ? 'Moniepoint' : (
                             (($active_default == 'wema') ? 'Wema Bank' :
-                            (($active_default == 'monnify') ? 'Moniepoint' :
-                                (($active_default == 'xixapay') ? 'PalmPay' :
-                                    (($active_default == 'paymentpoint') ? 'PaymentPoint' :
-                                    'PalmPay'))))
+                                (($active_default == 'monnify') ? 'Moniepoint' :
+                                    (($active_default == 'xixapay') ? 'PalmPay' :
+                                        (($active_default == 'paymentpoint') ? 'PalmPay' :
+                                            'PalmPay'))))
                         ),
-                        
+
                         'paymentpoint_account_number' => $user->paymentpoint_account_number,
                         'paymentpoint_account_name' => $user->paymentpoint_account_name,
                         'paymentpoint_bank_name' => $user->paymentpoint_bank_name,
@@ -466,11 +462,11 @@ class AuthController extends Controller
                 ])->setStatusCode(403);
             }
         } else {
-            return redirect(config('app.error_500'));
             return response()->json([
-                'status' => 403,
-                'message' => 'Unable to Authenticate System',
-            ])->setStatusCode(403);
+                'status' => 'error',
+                'message' => 'Origin validation failed. Please check your .env configuration.',
+                'origin' => $request->headers->get('origin')
+            ], 403);
         }
     }
     public function verify(Request $request)
@@ -634,9 +630,8 @@ class AuthController extends Controller
     }
     public function login(Request $request)
     {
-        $explode_url = explode(',', config('app.habukhan_app_key'));
         $origin = $request->headers->get('origin');
-        if (!$origin || in_array($origin, $explode_url)) {
+        if ($this->isValidOrigin($request)) {
             try {
                 //our login function over here
                 \Log::info('API Login Hit: ' . json_encode($request->except('password')));
@@ -871,8 +866,7 @@ class AuthController extends Controller
             return response()->json([
                 'status' => 'error',
                 'message' => 'Origin validation failed. Please check your .env configuration.',
-                'origin' => $request->headers->get('origin'),
-                'allowed' => explode(',', config('app.habukhan_app_key'))
+                'origin' => $request->headers->get('origin')
             ], 403);
         }
     }
@@ -921,7 +915,11 @@ class AuthController extends Controller
                 ])->setStatusCode(403);
             }
         } else {
-            return redirect(config('app.error_500'));
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Origin validation failed.',
+                'origin' => $request->headers->get('origin')
+            ], 403);
         }
     }
 

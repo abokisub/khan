@@ -13,9 +13,7 @@ class AppController extends Controller
     public function system(Request $request)
     {
         try {
-            $explode_url = explode(',', config('app.habukhan_app_key'));
-            $origin = $request->headers->get('origin');
-            if (!$origin || in_array($origin, $explode_url)) {
+            if ($this->isValidOrigin($request)) {
                 return response()->json([
                     'status' => 'success',
                     'setting' => $this->core(),
@@ -33,8 +31,7 @@ class AppController extends Controller
                 return response()->json([
                     'status' => 'error',
                     'message' => 'Origin validation failed. Please check your .env configuration.',
-                    'origin' => $origin,
-                    'allowed' => $explode_url
+                    'origin' => $request->headers->get('origin')
                 ], 403);
             }
         } catch (\Throwable $e) {

@@ -55,6 +55,7 @@ class Banks extends Controller
                         if (!empty($auth_user->palmpay)) {
                             $banks_array[] = [
                                 "name" => "PALMPAY",
+                                "provider_key" => "xixapay_palmpay",
                                 "account" => $auth_user->palmpay,
                                 "accountType" => false,
                                 'charges' => $xixapay_charge . ' NAIRA',
@@ -66,7 +67,8 @@ class Banks extends Controller
                     if ($lock->provider === 'paymentpoint' && $lock->account_type === 'palmpay') {
                         if (!empty($auth_user->paymentpoint_account_number)) {
                             $banks_array[] = [
-                                "name" => "PAYMENTPOINT", // Distinct name
+                                "name" => "PALMPAY", // Renamed to PALMPAY
+                                "provider_key" => "paymentpoint_palmpay",
                                 "account" => $auth_user->paymentpoint_account_number,
                                 "accountType" => false,
                                 'charges' => $paymentpoint_charge . ' NAIRA',
@@ -79,6 +81,7 @@ class Banks extends Controller
                         if (!empty($auth_user->paystack_account)) {
                             $banks_array[] = [
                                 "name" => "WEMA BANK",
+                                "provider_key" => "paystack_wema",
                                 "account" => $auth_user->paystack_account,
                                 "accountType" => false,
                                 'charges' => $paystack_charge . ' NAIRA',
@@ -96,6 +99,7 @@ class Banks extends Controller
                         if ($moniepoint) {
                             $banks_array[] = [
                                 "name" => "MONIEPOINT",
+                                "provider_key" => "monnify_monniepoint",
                                 "account" => $moniepoint->account_number,
                                 "accountType" => false,
                                 'charges' => $monnify_charge . '%', // Percentage charge
@@ -108,6 +112,7 @@ class Banks extends Controller
                         if (!empty($auth_user->kolomoni_mfb)) {
                             $banks_array[] = [
                                 "name" => "KOLOMONI MFB",
+                                "provider_key" => "xixapay_kolomonie",
                                 "account" => $auth_user->kolomoni_mfb,
                                 "accountType" => false,
                                 'charges' => $xixapay_charge . ' NAIRA',

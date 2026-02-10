@@ -9,6 +9,8 @@ use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Request;
+use App\Models\User;
 
 class Controller extends BaseController
 {
@@ -199,6 +201,43 @@ class Controller extends BaseController
         }
     }
 
+    /**
+     * Centralized Origin Validation
+     * Allows requests with No Origin (same-origin browser refreshes)
+     * OR requests from allowed domains in HABUKHAN_APP_KEY
+     */
+    protected function isValidOrigin(Request $request)
+    {
+        $origin = $request->headers->get('origin');
+        $allowedStr = config('app.habukhan_app_key', '');
+        $allowedOrigins = explode(',', $allowedStr);
+
+        // 1. Allow internal/same-origin browser requests (often have no Origin header on page load/refresh)
+        if (!$origin) {
+            return true;
+        }
+
+        // 2. Check against allowed list
+        if (in_array($origin, $allowedOrigins)) {
+            return true;
+        }
+
+        // 3. Optional: check for exact match with APP_URL if not in list
+        $appUrl = config('app.url');
+        if ($origin === $appUrl) {
+            return true;
+        }
+
+        \Log::warning('Origin Validation Failed', [
+            'origin' => $origin,
+            'allowed' => $allowedOrigins,
+            'ip' => $request->ip(),
+            'path' => $request->path()
+        ]);
+
+        return false;
+    }
+
 
     public function generate_ref($title)
     {
@@ -227,10 +266,9 @@ class Controller extends BaseController
     public function xixapay_account($username)
     {
         try {
-            $check_first = DB::table('user')->where('username', $username);
+            $get_user = User::where('username', $username)->first();
 
-            if ($check_first->count() == 1) {
-                $get_user = $check_first->get()[0];
+            if ($get_user) {
 
                 // Cooldown check: Don't retry more than once every 10 minutes
                 $cacheKey = "xixapay_sync_" . $get_user->id;
@@ -304,7 +342,7 @@ class Controller extends BaseController
     public function monnify_account($username)
     {
         try {
-            $user = DB::table('user')->where('username', $username)->first();
+            $user = User::where('username', $username)->first();
             if (!$user) {
                 \Log::error("Monnify: User $username not found");
                 return;
@@ -427,7 +465,7 @@ class Controller extends BaseController
     public function paymentpoint_account($username)
     {
         try {
-            $user = DB::table('user')->where('username', $username)->first();
+            $user = User::where('username', $username)->first();
 
             if ($user && empty($user->paymentpoint_account_number)) {
                 // Check cooldown
@@ -437,7 +475,7 @@ class Controller extends BaseController
                 }
 
                 $service = new \App\Services\PaymentPointService(); // Use full namespace or import
-                $service->createVirtualAccount(json_decode(json_encode($user), false)); // Pass object
+                $service->createVirtualAccount($user); // Pass model directly
 
                 // Set cooldown
                 \Cache::put($cacheKey, 'attempted', 10);
@@ -454,7 +492,7 @@ class Controller extends BaseController
     public function paystack_account($username)
     {
         try {
-            $user = DB::table('user')->where('username', $username)->first();
+            $user = User::where('username', $username)->first();
             if (!$user) {
                 \Log::error('Paystack: User not found for username: ' . $username);
                 return false;
@@ -530,14 +568,14 @@ class Controller extends BaseController
             \Log::info('Paystack: Dedicated Account API Status: ' . $accountResponse->status() . ' Response: ' . json_encode($accountResponse->json()));
             if ($accountResponse->successful() && isset($accountResponse['data']['account_number'])) {
                 $acc = $accountResponse['data'];
-                DB::table('user')->where('id', $user->id)->update([
+                \Log::info('Paystack SYNC SUCCESS for ' . $username . ': ' . $acc['account_number']);
+                $user->update([
                     'paystack_account' => $acc['account_number'],
                     'paystack_bank' => $acc['bank']['name'] ?? 'Paystack',
                 ]);
-                \Log::info('Paystack SYNC: Account assigned for user: ' . $username);
                 return true;
             } else {
-                \Log::error('Paystack SYNC FAILED for user: ' . $username . '. Response: ' . $accountResponse->body());
+                \Log::error('Paystack SYNC FAILED for ' . $username . '. Status: ' . $accountResponse->status() . ' Body: ' . $accountResponse->body());
             }
 
             // Set default 10min cooldown
