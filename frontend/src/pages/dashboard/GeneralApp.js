@@ -193,8 +193,8 @@ export default function GeneralApp() {
     const fetchWelcome = async () => {
       try {
         const response = await axios.get('/api/secure/welcome');
-        if (response.data && response.data.message) {
-          setMarqueeMessage(response.data.message);
+        if (response.data && response.data.notif_message) {
+          setMarqueeMessage(response.data.notif_message);
         }
       } catch (error) {
         console.error('Failed to fetch welcome message:', error);
@@ -229,16 +229,14 @@ export default function GeneralApp() {
             <Userverified displayName={user?.username} bool={user?.type === 'ADMIN'} isVerified={user?.is_bvn} />
           </Grid>
 
-          {setting?.setting?.referral === 1 && (
-            <Grid item xs={12}>
-              <Referral />
-            </Grid>
-          )}
+          <Grid item xs={12}>
+            <Referral />
+          </Grid>
 
           <Upgrade />
 
           <Grid item xs={12} md={4}><Appbalance title="Wallet Balance" total={user.bal} /></Grid>
-          {setting?.setting?.referral === 1 && <Grid item xs={12} md={4}><Appbalance title="Earning Balance" total={user.refbal} /></Grid>}
+          <Grid item xs={12} md={4}><Appbalance title="Earning Balance" total={user.refbal} /></Grid>
           <Grid item xs={12} md={4}>
             <Databalance title="Data Purchased Today" total={datapurchase !== undefined ? datapurchase : '...'} />
           </Grid>
