@@ -16,8 +16,9 @@ class CharityController extends Controller
      */
     public function searchUsers(Request $request)
     {
-        $explode_url = explode(',', config('app.habukhan_app_key'));
-        if (!$request->headers->get('origin') || in_array($request->headers->get('origin'), $explode_url)) {
+        $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
+        $origin = rtrim($request->headers->get('origin'), '/');
+        if (!$origin || in_array($origin, $allowed_urls)) {
             $user_id = $this->verifytoken($request->id);
             if ($user_id) {
                 $check_admin = DB::table('user')->where(['id' => $user_id, 'type' => 'ADMIN'])->first();
@@ -45,8 +46,9 @@ class CharityController extends Controller
      */
     public function addCharity(Request $request)
     {
-        $explode_url = explode(',', config('app.habukhan_app_key'));
-        if (!$request->headers->get('origin') || in_array($request->headers->get('origin'), $explode_url)) {
+        $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
+        $origin = rtrim($request->headers->get('origin'), '/');
+        if (!$origin || in_array($origin, $allowed_urls)) {
             $user_id = $this->verifytoken($request->id);
             if ($user_id) {
                 $check_admin = DB::table('user')->where(['id' => $user_id, 'type' => 'ADMIN'])->first();
@@ -114,8 +116,9 @@ class CharityController extends Controller
      */
     public function updateCharity(Request $request)
     {
-        $explode_url = explode(',', config('app.habukhan_app_key'));
-        if (!$request->headers->get('origin') || in_array($request->headers->get('origin'), $explode_url)) {
+        $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
+        $origin = rtrim($request->headers->get('origin'), '/');
+        if (!$origin || in_array($origin, $allowed_urls)) {
             $user_id = $this->verifytoken($request->id);
             if ($user_id) {
                 $check_admin = DB::table('user')->where(['id' => $user_id, 'type' => 'ADMIN'])->first();
@@ -178,8 +181,9 @@ class CharityController extends Controller
      */
     public function addCampaign(Request $request)
     {
-        $explode_url = explode(',', config('app.habukhan_app_key'));
-        if (!$request->headers->get('origin') || in_array($request->headers->get('origin'), $explode_url)) {
+        $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
+        $origin = rtrim($request->headers->get('origin'), '/');
+        if (!$origin || in_array($origin, $allowed_urls)) {
             $user_id = $this->verifytoken($request->id);
             if ($user_id) {
                 $check_admin = DB::table('user')->where(['id' => $user_id, 'type' => 'ADMIN'])->first();
@@ -254,12 +258,12 @@ class CharityController extends Controller
             ->join('charities', 'campaigns.charity_id', '=', 'charities.id')
             ->where('campaigns.status', 'active') // Default to active only for feed
             ->select(
-            'campaigns.*',
-            'charities.name as charity_name',
-            'charities.username as charity_username',
-            'charities.logo',
-            'charities.verification_status'
-        );
+                'campaigns.*',
+                'charities.name as charity_name',
+                'charities.username as charity_username',
+                'charities.logo',
+                'charities.verification_status'
+            );
 
         if ($request->status) {
             // Override default if specific status requested
@@ -284,21 +288,20 @@ class CharityController extends Controller
 
         if ($request->has('random') && $request->random == 'true') {
             $query->inRandomOrder();
-        }
-        else {
+        } else {
             $query->orderBy('campaigns.id', 'desc');
         }
 
         $campaigns = $query->paginate($request->limit ?? 10)
             ->through(function ($campaign) {
-            $campaign->logo_url = $campaign->logo ? url($campaign->logo) : null;
-            $campaign->image_url = $campaign->image ? url($campaign->image) : null;
-            // Calculate percentage
-            $campaign->percentage = $campaign->target_amount > 0
-                ? min(100, round(($campaign->current_amount / $campaign->target_amount) * 100))
-                : 0;
-            return $campaign;
-        });
+                $campaign->logo_url = $campaign->logo ? url($campaign->logo) : null;
+                $campaign->image_url = $campaign->image ? url($campaign->image) : null;
+                // Calculate percentage
+                $campaign->percentage = $campaign->target_amount > 0
+                    ? min(100, round(($campaign->current_amount / $campaign->target_amount) * 100))
+                    : 0;
+                return $campaign;
+            });
 
         return response()->json([
             'status' => 200,
@@ -354,9 +357,9 @@ class CharityController extends Controller
         }
         $charities = $query->orderBy('id', 'desc')->paginate($request->limit ?? 10)
             ->through(function ($charity) {
-            $charity->logo_url = $charity->logo ? url($charity->logo) : null;
-            return $charity;
-        });
+                $charity->logo_url = $charity->logo ? url($charity->logo) : null;
+                return $charity;
+            });
 
         return response()->json([
             'status' => 200,
@@ -408,9 +411,9 @@ class CharityController extends Controller
                 ->orderBy('donations.id', 'desc')
                 ->paginate($request->limit ?? 10)
                 ->through(function ($donation) {
-                $donation->date_formatted = Carbon::parse($donation->created_at)->format('d M Y, h:i A');
-                return $donation;
-            });
+                    $donation->date_formatted = Carbon::parse($donation->created_at)->format('d M Y, h:i A');
+                    return $donation;
+                });
 
             return response()->json([
                 'status' => 200,
@@ -492,8 +495,9 @@ class CharityController extends Controller
      */
     public function processPayouts(Request $request)
     {
-        $explode_url = explode(',', config('app.habukhan_app_key'));
-        if (!$request->headers->get('origin') || in_array($request->headers->get('origin'), $explode_url)) {
+        $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
+        $origin = rtrim($request->headers->get('origin'), '/');
+        if (!$origin || in_array($origin, $allowed_urls)) {
             $user_id = $this->verifytoken($request->id);
             if ($user_id) {
                 // Check if admin or just a valid call
@@ -502,8 +506,7 @@ class CharityController extends Controller
                 // If specific ID is provided, we can force payout even if active (incomplete)
                 if ($request->has('campaign_id')) {
                     $query->where('id', $request->campaign_id);
-                }
-                else {
+                } else {
                     // Bulk Mode: Only closed campaigns for safety
                     $query->where('status', 'closed');
                 }
@@ -556,8 +559,7 @@ class CharityController extends Controller
 
                         DB::commit();
                         $count++;
-                    }
-                    catch (\Exception $e) {
+                    } catch (\Exception $e) {
                         DB::rollBack();
                     }
                 }
@@ -574,8 +576,9 @@ class CharityController extends Controller
      */
     public function approveWithdrawal(Request $request)
     {
-        $explode_url = explode(',', config('app.habukhan_app_key'));
-        if (!$request->headers->get('origin') || in_array($request->headers->get('origin'), $explode_url)) {
+        $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
+        $origin = rtrim($request->headers->get('origin'), '/');
+        if (!$origin || in_array($origin, $allowed_urls)) {
             $user_id = $this->verifytoken($request->id);
             if ($user_id) {
                 $check_admin = DB::table('user')->where(['id' => $user_id, 'type' => 'ADMIN'])->first();
@@ -615,8 +618,9 @@ class CharityController extends Controller
      */
     public function deleteCharity(Request $request)
     {
-        $explode_url = explode(',', config('app.habukhan_app_key'));
-        if (!$request->headers->get('origin') || in_array($request->headers->get('origin'), $explode_url)) {
+        $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
+        $origin = rtrim($request->headers->get('origin'), '/');
+        if (!$origin || in_array($origin, $allowed_urls)) {
             $user_id = $this->verifytoken($request->id);
             if ($user_id) {
                 $check_admin = DB::table('user')->where(['id' => $user_id, 'type' => 'ADMIN'])->first();
@@ -645,8 +649,9 @@ class CharityController extends Controller
      */
     public function deleteCampaign(Request $request)
     {
-        $explode_url = explode(',', config('app.habukhan_app_key'));
-        if (!$request->headers->get('origin') || in_array($request->headers->get('origin'), $explode_url)) {
+        $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
+        $origin = rtrim($request->headers->get('origin'), '/');
+        if (!$origin || in_array($origin, $allowed_urls)) {
             $user_id = $this->verifytoken($request->id);
             if ($user_id) {
                 $check_admin = DB::table('user')->where(['id' => $user_id, 'type' => 'ADMIN'])->first();

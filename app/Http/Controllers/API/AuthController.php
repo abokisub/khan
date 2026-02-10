@@ -17,9 +17,9 @@ class AuthController extends Controller
     {
         set_time_limit(300); // Increased time limit
         ignore_user_abort(true); // Continue processing even if user disconnects
-        $explode_url = explode(',', config('app.habukhan_app_key'));
-        $origin = $request->headers->get('origin');
-        if (!$origin || in_array($origin, $explode_url)) {
+        $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
+        $origin = rtrim($request->headers->get('origin'), '/');
+        if (!$origin || in_array($origin, $allowed_urls)) {
             $validator = validator::make($request->all(), [
                 'name' => 'required|max:199|min:3',
                 'email' => 'required|unique:user,email|max:255|email',
@@ -58,21 +58,18 @@ class AuthController extends Controller
                     'message' => $validator->errors()->first(),
                     'status' => 403
                 ])->setStatusCode(403);
-            }
-            else if (substr($request->phone, 0, 1) != '0') {
+            } else if (substr($request->phone, 0, 1) != '0') {
                 return response()->json([
                     'message' => 'Invalid Phone Number',
                     'status' => 403
                 ])->setStatusCode(403);
-            }
-            else
+            } else
                 if ($request->ref != null && $check_ref == 0) {
                     return response()->json([
                         'message' => 'Invalid Referral Username You can Leave the Referral Username Box Empty',
                         'status' => '403'
                     ])->setStatusCode(403);
-                }
-                else {
+                } else {
                     $user = new User();
                     $user->name = $request->name;
                     $user->username = $request->username;
@@ -112,8 +109,7 @@ class AuthController extends Controller
                             $palmpay_enabled = $settings->palmpay_enabled ?? true;
                             $default_virtual_account = $settings->default_virtual_account ?? 'palmpay';
                             $default_virtual_account = ($default_virtual_account == 'palmpay') ? 'xixapay' : $default_virtual_account; // Migration for name change if needed
-                        }
-                        catch (\Exception $e) {
+                        } catch (\Exception $e) {
                             $monnify_enabled = false;
                             $wema_enabled = false;
                             $xixapay_enabled = false;
@@ -137,16 +133,14 @@ class AuthController extends Controller
                         try {
                             if ($xixapay_enabled)
                                 $this->xixapay_account($user->username);
-                        }
-                        catch (\Exception $e) {
+                        } catch (\Exception $e) {
                             \Log::error("Register Xixapay: " . $e->getMessage());
                         }
 
                         try {
                             if ($monnify_enabled || $wema_enabled)
                                 $this->monnify_account($user->username);
-                        }
-                        catch (\Exception $e) {
+                        } catch (\Exception $e) {
                             \Log::error("Register Monnify: " . $e->getMessage());
                         }
 
@@ -154,8 +148,7 @@ class AuthController extends Controller
                         //    $this->paymentpoint_account($user->username);
                         try {
                             $this->paystack_account($user->username);
-                        }
-                        catch (\Exception $e) {
+                        } catch (\Exception $e) {
                             \Log::error("Register Paystack: " . $e->getMessage());
                         }
                         // Always try paystack or link to setting
@@ -186,14 +179,14 @@ class AuthController extends Controller
 
                             // Polyfill for Frontend 'Generating...' issue
                             'account_number' => ($active_default == 'wema') ? ($wema_enabled ? $user->paystack_account : null) :
-                            (($active_default == 'monnify') ? ($monnify_enabled ? $moniepoint_acc : null) :
-                            (($active_default == 'xixapay') ? ($xixapay_enabled ? $user->palmpay : null) :
-                            null)),
+                                (($active_default == 'monnify') ? ($monnify_enabled ? $moniepoint_acc : null) :
+                                    (($active_default == 'xixapay') ? ($xixapay_enabled ? $user->palmpay : null) :
+                                        null)),
 
                             'bank_name' => ($active_default == 'wema') ? 'Wema Bank' :
-                            (($active_default == 'monnify') ? 'Moniepoint' :
-                            (($active_default == 'xixapay') ? 'PalmPay' :
-                            null)),
+                                (($active_default == 'monnify') ? 'Moniepoint' :
+                                    (($active_default == 'xixapay') ? 'PalmPay' :
+                                        null)),
 
                             'paystack_account' => $user->paystack_account,
                             'paystack_bank' => $user->paystack_bank,
@@ -242,9 +235,8 @@ class AuthController extends Controller
                             ];
                             try {
                                 MailController::send_mail($email_data, 'email.verify');
-                            }
-                            catch (\Throwable $e) {
-                            // Continue even if email fails
+                            } catch (\Throwable $e) {
+                                // Continue even if email fails
                             }
                             return response()->json([
                                 'status' => 'verify',
@@ -253,8 +245,7 @@ class AuthController extends Controller
                                 'token' => $token,
                                 'user' => $user_details
                             ]);
-                        }
-                        else {
+                        } else {
                             // Default fallback (Mobile)
                             DB::table('user')->where(['id' => $user->id])->update(['status' => 1]);
                             return response()->json([
@@ -264,16 +255,14 @@ class AuthController extends Controller
                                 'user' => $user_details
                             ]);
                         }
-                    }
-                    else {
+                    } else {
                         return response()->json([
                             'status' => 403,
                             'message' => 'Unable to Register User. Please try again later.',
                         ])->setStatusCode(403);
                     }
                 }
-        }
-        else {
+        } else {
             return response()->json([
                 'status' => 403,
                 'message' => 'Unable to Authenticate System'
@@ -282,9 +271,9 @@ class AuthController extends Controller
     }
     public function account(Request $request)
     {
-        $explode_url = explode(',', config('app.habukhan_app_key'));
-        $origin = $request->headers->get('origin');
-        if (!$origin || in_array($origin, $explode_url)) {
+        $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
+        $origin = rtrim($request->headers->get('origin'), '/');
+        if (!$origin || in_array($origin, $allowed_urls)) {
             $user_token = $request->id;
             $real_token = $this->verifytoken($user_token);
             if (!is_null($real_token)) {
@@ -312,8 +301,7 @@ class AuthController extends Controller
                         $palmpay_enabled = $settings->palmpay_enabled ?? true;
                         $default_virtual_account = $settings->default_virtual_account ?? 'palmpay';
                         $default_virtual_account = ($default_virtual_account == 'palmpay') ? 'xixapay' : $default_virtual_account; // Migration for name change if needed
-                    }
-                    catch (\Exception $e) {
+                    } catch (\Exception $e) {
                         $monnify_enabled = true;
                         $wema_enabled = true;
                         $xixapay_enabled = true;
@@ -346,32 +334,28 @@ class AuthController extends Controller
                     try {
                         if ($xixapay_enabled && $user->palmpay == null)
                             $this->xixapay_account($user->username);
-                    }
-                    catch (\Exception $e) {
+                    } catch (\Exception $e) {
                         \Log::error("Account Xixapay: " . $e->getMessage());
                     }
 
                     try {
                         if (($monnify_enabled || $wema_enabled) && ($user->paystack_account == null || DB::table('user_bank')->where(['username' => $user->username, 'bank' => 'MONIEPOINT'])->count() == 0))
                             $this->monnify_account($user->username);
-                    }
-                    catch (\Exception $e) {
+                    } catch (\Exception $e) {
                         \Log::error("Account Monnify: " . $e->getMessage());
                     }
 
                     try {
                         if ($palmpay_enabled && ($user->palmpay == null || $user->opay == null))
                             $this->paymentpoint_account($user->username);
-                    }
-                    catch (\Exception $e) {
+                    } catch (\Exception $e) {
                         \Log::error("Account PaymentPoint: " . $e->getMessage());
                     }
 
                     try {
                         if ($user->paystack_account == null)
                             $this->paystack_account($user->username);
-                    }
-                    catch (\Exception $e) {
+                    } catch (\Exception $e) {
                         \Log::error("Account Paystack: " . $e->getMessage());
                     }
                     // $this->insert_stock($user->username); // Optimize stock check if needed
@@ -399,19 +383,19 @@ class AuthController extends Controller
 
                         // Polyfill for Frontend 'Generating...' issue
                         'account_number' => ($monnify_enabled && !empty($moniepoint_acc)) ? $moniepoint_acc : (
-                        ($active_default == 'wema') ? $user->paystack_account :
-                        (($active_default == 'monnify') ? $moniepoint_acc :
-                        (($active_default == 'xixapay') ? $user->palmpay :
-                        null))
-                    ),
+                            ($active_default == 'wema') ? $user->paystack_account :
+                            (($active_default == 'monnify') ? $moniepoint_acc :
+                                (($active_default == 'xixapay') ? $user->palmpay :
+                                    null))
+                        ),
 
                         // Keep Paystack independent or link to another setting if needed
                         'bank_name' => ($monnify_enabled && !empty($moniepoint_acc)) ? 'Moniepoint' : (
-                        ($active_default == 'wema') ? 'Wema Bank' :
-                        (($active_default == 'monnify') ? 'Moniepoint' :
-                        (($active_default == 'xixapay') ? 'PalmPay' :
-                        'PalmPay'))
-                    ),
+                            ($active_default == 'wema') ? 'Wema Bank' :
+                            (($active_default == 'monnify') ? 'Moniepoint' :
+                                (($active_default == 'xixapay') ? 'PalmPay' :
+                                    'PalmPay'))
+                        ),
 
                         'paystack_account' => $user->paystack_account,
                         'paystack_bank' => $user->paystack_bank,
@@ -433,8 +417,7 @@ class AuthController extends Controller
                             'message' => 'Account Not Yet Verified',
                             'user' => $user_details
                         ]);
-                    }
-                    else if ($user->status == 1) {
+                    } else if ($user->status == 1) {
                         //set up the user over here
 
 
@@ -443,41 +426,35 @@ class AuthController extends Controller
                             'message' => 'account verified',
                             'user' => $user_details
                         ]);
-                    }
-                    else if ($user->status == '2') {
+                    } else if ($user->status == '2') {
                         return response()->json([
                             'status' => 403,
                             'message' => 'Account Banned'
                         ])->setStatusCode(403);
-                    }
-                    elseif ($user->status == '3') {
+                    } elseif ($user->status == '3') {
                         return response()->json([
                             'status' => 403,
                             'message' => 'Account Deactivated'
                         ])->setStatusCode(403);
-                    }
-                    else {
+                    } else {
                         return response()->json([
                             'status' => 403,
                             'message' => 'Unable to Get User'
                         ])->setStatusCode(403);
                     }
-                }
-                else {
+                } else {
                     return response()->json([
                         'status' => 403,
                         'message' => 'Not Allowed',
                     ])->setStatusCode(403);
                 }
-            }
-            else {
+            } else {
                 return response()->json([
                     'status' => 403,
                     'message' => 'AccessToken Expired'
                 ])->setStatusCode(403);
             }
-        }
-        else {
+        } else {
             return redirect(config('app.error_500'));
             return response()->json([
                 'status' => 403,
@@ -487,8 +464,9 @@ class AuthController extends Controller
     }
     public function verify(Request $request)
     {
-        $explode_url = explode(',', config('app.habukhan_app_key'));
-        if (!$request->headers->get('origin') || in_array($request->headers->get('origin'), $explode_url)) {
+        $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
+        $origin = rtrim($request->headers->get('origin'), '/');
+        if (!$origin || in_array($origin, $allowed_urls)) {
             $habukhan_check = DB::table('user')->where('email', $request->email);
             if ($habukhan_check->count() == 1) {
                 $user = $habukhan_check->get()[0];
@@ -516,8 +494,7 @@ class AuthController extends Controller
                     $xixapay_enabled = $settings->xixapay_enabled ?? true;
                     $palmpay_enabled = $settings->palmpay_enabled ?? true;
                     $default_virtual_account = $settings->default_virtual_account ?? 'palmpay';
-                }
-                catch (\Exception $e) {
+                } catch (\Exception $e) {
                     $monnify_enabled = true;
                     $wema_enabled = true;
                     $xixapay_enabled = true;
@@ -612,8 +589,7 @@ class AuthController extends Controller
                         'user' => $user_details,
                         'token' => $this->generatetoken($user->id)
                     ]);
-                }
-                else {
+                } else {
                     // Fix for Connection Error/Timeout Retry Issue
                     // If the previous request succeeded in DB but failed to return response (timeout),
                     // the user is already verified (status == 1) but OTP is null.
@@ -631,15 +607,13 @@ class AuthController extends Controller
                         'message' => 'Invalid OTP'
                     ])->setStatusCode(403);
                 }
-            }
-            else {
+            } else {
                 return response()->json([
                     'status' => 403,
                     'message' => 'Unable to verify user'
                 ])->setStatusCode(403);
             }
-        }
-        else {
+        } else {
             return redirect(config('app.error_500'));
             return response()->json([
                 'status' => 403,
@@ -650,9 +624,9 @@ class AuthController extends Controller
     }
     public function login(Request $request)
     {
-        $explode_url = explode(',', config('app.habukhan_app_key'));
-        $origin = $request->headers->get('origin');
-        if (!$origin || in_array($origin, $explode_url)) {
+        $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
+        $origin = rtrim($request->headers->get('origin'), '/');
+        if (!$origin || in_array($origin, $allowed_urls)) {
             try {
                 //our login function over here
                 \Log::info('API Login Hit: ' . json_encode($request->except('password')));
@@ -667,8 +641,7 @@ class AuthController extends Controller
                         'status' => 403,
                         'message' => $validator->errors()->first()
                     ])->setStatusCode(403);
-                }
-                else {
+                } else {
                     $check_system = User::where('username', $request->username);
                     if ($check_system->count() == 1) {
                         $user = $check_system->get()[0];
@@ -689,8 +662,7 @@ class AuthController extends Controller
                             $palmpay_enabled = $settings->palmpay_enabled ?? true;
                             $default_virtual_account = $settings->default_virtual_account ?? 'palmpay';
                             $default_virtual_account = ($default_virtual_account == 'palmpay') ? 'xixapay' : $default_virtual_account; // Migration for name change if needed
-                        }
-                        catch (\Exception $e) {
+                        } catch (\Exception $e) {
                             $monnify_enabled = true;
                             $wema_enabled = true;
                             $xixapay_enabled = true;
@@ -748,19 +720,19 @@ class AuthController extends Controller
                             // Polyfill for Frontend 'Generating...' issue
                             // LOGIC: Prefer Moniepoint (sterlen) if available, otherwise follow default settings.
                             'account_number' => ($monnify_enabled && !empty($moniepoint_acc)) ? $moniepoint_acc : (
-                            ($active_default == 'wema') ? $user->paystack_account :
-                            (($active_default == 'monnify') ? $moniepoint_acc :
-                            (($active_default == 'xixapay') ? $user->palmpay :
-                            null))
-                        ),
+                                ($active_default == 'wema') ? $user->paystack_account :
+                                (($active_default == 'monnify') ? $moniepoint_acc :
+                                    (($active_default == 'xixapay') ? $user->palmpay :
+                                        null))
+                            ),
 
                             // Keep Paystack independent or link to another setting if needed
                             'bank_name' => ($monnify_enabled && !empty($moniepoint_acc)) ? 'Moniepoint' : (
-                            ($active_default == 'wema') ? 'Wema Bank' :
-                            (($active_default == 'monnify') ? 'Moniepoint' :
-                            (($active_default == 'xixapay') ? 'PalmPay' :
-                            'PalmPay'))
-                        ),
+                                ($active_default == 'wema') ? 'Wema Bank' :
+                                (($active_default == 'monnify') ? 'Moniepoint' :
+                                    (($active_default == 'xixapay') ? 'PalmPay' :
+                                        'PalmPay'))
+                            ),
 
                             'paystack_account' => $user->paystack_account,
                             'paystack_bank' => $user->paystack_bank,
@@ -791,24 +763,21 @@ class AuthController extends Controller
                             if ($user->status == 1 || trim(strtoupper($user->type)) == 'ADMIN' || strcasecmp($user->username, 'Habukhan') == 0) {
                                 return response()->json([
                                     'status' => 'success',
-                                    'message' => 'Login successfully (DEBUG: ' . $user->status . '/' . $user->type . ')',
+                                    'message' => 'Login successfully',
                                     'user' => $user_details,
                                     'token' => $this->generatetoken($user->id)
                                 ]);
-                            }
-                            else if ($user->status == 2) {
+                            } else if ($user->status == 2) {
                                 return response()->json([
                                     'status' => 403,
                                     'message' => $user->username . ' Your Account Has Been Banned'
                                 ])->setStatusCode(403);
-                            }
-                            else if ($user->status == 3) {
+                            } else if ($user->status == 3) {
                                 return response()->json([
                                     'status' => 403,
                                     'message' => $user->username . ' Your Account Has Been Deactivated'
                                 ])->setStatusCode(403);
-                            }
-                            else if ($user->status == 0) {
+                            } else if ($user->status == 0) {
                                 $use_core = $this->core();
                                 if ($use_core && !$use_core->is_verify_email) {
                                     // Auto-verify and login
@@ -847,8 +816,7 @@ class AuthController extends Controller
                                 ];
                                 try {
                                     MailController::send_mail($email_data, 'email.verify');
-                                }
-                                catch (\Throwable $e) {
+                                } catch (\Throwable $e) {
                                     \Log::error('OTP Mail Error (AuthController): ' . $e->getMessage());
                                 }
 
@@ -858,33 +826,29 @@ class AuthController extends Controller
                                     'user' => $user_details,
                                     'token' => $this->generatetoken($user->id),
                                 ]);
-                            }
-                            else {
+                            } else {
                                 \Log::warning('Login Failed: Status logic mismatch for User=' . $user->username . ', Status=' . $user->status);
                                 return response()->json([
                                     'status' => 403,
-                                    'message' => 'System is unable to verify user (DEBUG: status=' . $user->status . ')'
+                                    'message' => 'System is unable to verify user'
 
                                 ])->setStatusCode(403);
                             }
-                        }
-                        else {
+                        } else {
                             \Log::warning('Login Failed: Password mismatch for User=' . $user->username);
                             return response()->json([
                                 'status' => 403,
                                 'message' => 'Invalid Password Note Password is Case Sensitive'
                             ])->setStatusCode(403);
                         }
-                    }
-                    else {
+                    } else {
                         return response()->json([
                             'status' => 403,
-                            'message' => 'Invalid Username and Password. DEBUG: User=' . $request->username . ', Count=' . $check_system->count()
+                            'message' => 'Invalid Username and Password'
                         ])->setStatusCode(403);
                     }
                 }
-            }
-            catch (\Throwable $e) {
+            } catch (\Throwable $e) {
                 return response()->json([
                     'status' => 500,
                     'message' => 'Server Crash: ' . $e->getMessage(),
@@ -893,8 +857,7 @@ class AuthController extends Controller
                     'trace' => substr($e->getTraceAsString(), 0, 500)
                 ], 500);
             }
-        }
-        else {
+        } else {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Origin validation failed. Please check your .env configuration.',
@@ -906,8 +869,9 @@ class AuthController extends Controller
 
     public function resendOtp(Request $request)
     {
-        $explode_url = explode(',', config('app.habukhan_app_key'));
-        if (!$request->headers->get('origin') || in_array($request->headers->get('origin'), $explode_url)) {
+        $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
+        $origin = rtrim($request->headers->get('origin'), '/');
+        if (!$origin || in_array($origin, $allowed_urls)) {
             if (isset($request->id)) {
                 $sel_user = DB::table('user')->where('email', $request->id);
                 if ($sel_user->count() == 1) {
@@ -935,22 +899,19 @@ class AuthController extends Controller
                         'status' => 'status',
                         'message' => 'New OTP Resent to Your Email'
                     ]);
-                }
-                else {
+                } else {
                     return response()->json([
                         'status' => 403,
                         'message' => 'Unable to Detect User'
                     ])->setStatusCode(403);
                 }
-            }
-            else {
+            } else {
                 return response()->json([
                     'status' => 403,
                     'message' => 'An Error Occurred'
                 ])->setStatusCode(403);
             }
-        }
-        else {
+        } else {
             return redirect(config('app.error_500'));
         }
     }
@@ -1029,7 +990,7 @@ class AuthController extends Controller
         return response()->json([
             'status' => 'success',
             'message' => 'Lock status retrieved',
-            'data' => ['is_locked' => (bool)$lock->is_locked]
+            'data' => ['is_locked' => (bool) $lock->is_locked]
         ]);
     }
 
@@ -1091,19 +1052,19 @@ class AuthController extends Controller
             if ($result['status'] === 'success') {
                 // 4. Success - Save to DB
                 DB::table('user_kyc')->updateOrInsert(
-                [
-                    'user_id' => $user->id,
-                    'id_type' => $request->id_type
-                ],
-                [
-                    'id_number' => $request->id_number,
-                    'full_response_json' => json_encode($result['full_response']),
-                    'provider' => 'xixapay',
-                    'status' => 'verified',
-                    'verified_at' => now(),
-                    'created_at' => now(),
-                    'updated_at' => now()
-                ]
+                    [
+                        'user_id' => $user->id,
+                        'id_type' => $request->id_type
+                    ],
+                    [
+                        'id_number' => $request->id_number,
+                        'full_response_json' => json_encode($result['full_response']),
+                        'provider' => 'xixapay',
+                        'status' => 'verified',
+                        'verified_at' => now(),
+                        'created_at' => now(),
+                        'updated_at' => now()
+                    ]
                 );
 
                 // Update User Table
@@ -1129,8 +1090,7 @@ class AuthController extends Controller
                 'message' => $result['message']
             ], 400);
 
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             \Log::error("KYC Verification Error: " . $e->getMessage());
             return response()->json([
                 'status' => 'error',
@@ -1254,8 +1214,7 @@ class AuthController extends Controller
 
             return response()->json(['status' => 'error', 'message' => $result['message']], 400);
 
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             \Log::error("Customer Creation Error: " . $e->getMessage());
             return response()->json(['status' => 'error', 'message' => 'Service Unavailable'], 500);
         }
@@ -1339,8 +1298,7 @@ class AuthController extends Controller
 
             return response()->json(['status' => 'error', 'message' => $result['message']], 400);
 
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             \Log::error("Customer Update Error: " . $e->getMessage());
             return response()->json(['status' => 'error', 'message' => 'Service Unavailable'], 500);
         }
@@ -1383,8 +1341,7 @@ class AuthController extends Controller
 
             return response()->json(['status' => 'error', 'message' => $result['message']], 400);
 
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             \Log::error("Update VA Status Error: " . $e->getMessage());
             return response()->json(['status' => 'error', 'message' => 'Service Unavailable'], 500);
         }

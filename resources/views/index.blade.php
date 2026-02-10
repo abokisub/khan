@@ -5,7 +5,7 @@
         $manifestData = json_decode(file_get_contents($manifestPath), true);
         $manifest = $manifestData['files'] ?? [];
     }
-    
+
     // Ensure absolute paths from manifest or empty string
     $mainJs = isset($manifest['main.js']) ? asset($manifest['main.js']) : '';
     $mainCss = isset($manifest['main.css']) ? asset($manifest['main.css']) : '';
@@ -24,10 +24,10 @@
     <meta http-equiv="Expires" content="0">
 
     <meta name="theme-color" content="#000000" />
-    <meta name="description" content="KoboPoint - Digital Services Platform" />
+    <meta name="description" content="AmtPay - Digital Services Platform" />
     <link rel="apple-touch-icon" href="/logo192.png" />
     <link rel="manifest" href="/manifest.json" />
-    <title>{{ env('APP_NAME', 'KoboPoint') }}</title>
+    <title>{{ env('APP_NAME', 'AmtPay') }}</title>
 
     <script>
         // Professional Cache-Nuke: Force users to discard old design caches

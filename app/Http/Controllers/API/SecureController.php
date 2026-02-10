@@ -622,8 +622,9 @@ class SecureController extends Controller
     }
     public function DataPlanDelete(Request $request)
     {
-        $explode_url = explode(',', config('app.habukhan_app_key'));
-        if (!$request->headers->get('origin') || in_array($request->headers->get('origin'), $explode_url)) {
+        $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
+        $origin = rtrim($request->headers->get('origin'), '/');
+        if (!$origin || in_array($origin, $allowed_urls)) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN');
@@ -667,8 +668,9 @@ class SecureController extends Controller
     }
     public function AddDataPlan(Request $request)
     {
-        $explode_url = explode(',', config('app.habukhan_app_key'));
-        if (!$request->headers->get('origin') || in_array($request->headers->get('origin'), $explode_url)) {
+        $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
+        $origin = rtrim($request->headers->get('origin'), '/');
+        if (!$origin || in_array($origin, $allowed_urls)) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN');
@@ -819,8 +821,9 @@ class SecureController extends Controller
     }
     public function RDataPlan(Request $request)
     {
-        $explode_url = explode(',', config('app.habukhan_app_key'));
-        if (!$request->headers->get('origin') || in_array($request->headers->get('origin'), $explode_url)) {
+        $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
+        $origin = rtrim($request->headers->get('origin'), '/');
+        if (!$origin || in_array($origin, $allowed_urls)) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN');
@@ -871,8 +874,9 @@ class SecureController extends Controller
     }
     public function EditDataPlan(Request $request)
     {
-        $explode_url = explode(',', config('app.habukhan_app_key'));
-        if (!$request->headers->get('origin') || in_array($request->headers->get('origin'), $explode_url)) {
+        $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
+        $origin = rtrim($request->headers->get('origin'), '/');
+        if (!$origin || in_array($origin, $allowed_urls)) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN');
@@ -1013,8 +1017,9 @@ class SecureController extends Controller
     }
     public function DeleteCablePlan(Request $request)
     {
-        $explode_url = explode(',', config('app.habukhan_app_key'));
-        if (in_array($request->headers->get('origin'), $explode_url)) {
+        $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
+        $origin = rtrim($request->headers->get('origin'), '/');
+        if (!$origin || in_array($origin, $allowed_urls)) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN');
@@ -1058,8 +1063,9 @@ class SecureController extends Controller
     }
     public function RCablePlan(Request $request)
     {
-        $explode_url = explode(',', config('app.habukhan_app_key'));
-        if (in_array($request->headers->get('origin'), $explode_url)) {
+        $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
+        $origin = rtrim($request->headers->get('origin'), '/');
+        if (!$origin || in_array($origin, $allowed_urls)) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN');
@@ -1110,8 +1116,9 @@ class SecureController extends Controller
     }
     public function AddCablePlan(Request $request)
     {
-        $explode_url = explode(',', config('app.habukhan_app_key'));
-        if (in_array($request->headers->get('origin'), $explode_url)) {
+        $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
+        $origin = rtrim($request->headers->get('origin'), '/');
+        if (!$origin || in_array($origin, $allowed_urls)) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN');
@@ -1206,8 +1213,9 @@ class SecureController extends Controller
     }
     public function EditCablePlan(Request $request)
     {
-        $explode_url = explode(',', config('app.habukhan_app_key'));
-        if (in_array($request->headers->get('origin'), $explode_url)) {
+        $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
+        $origin = rtrim($request->headers->get('origin'), '/');
+        if (!$origin || in_array($origin, $allowed_urls)) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN');
@@ -1292,8 +1300,9 @@ class SecureController extends Controller
     }
     public function DeleteBillPlan(Request $request)
     {
-        $explode_url = explode(',', config('app.habukhan_app_key'));
-        if (in_array($request->headers->get('origin'), $explode_url)) {
+        $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
+        $origin = rtrim($request->headers->get('origin'), '/');
+        if (!$origin || in_array($origin, $allowed_urls)) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN');
@@ -1337,8 +1346,9 @@ class SecureController extends Controller
     }
     public function RBillPlan(Request $request)
     {
-        $explode_url = explode(',', config('app.habukhan_app_key'));
-        if (in_array($request->headers->get('origin'), $explode_url)) {
+        $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
+        $origin = rtrim($request->headers->get('origin'), '/');
+        if (!$origin || in_array($origin, $allowed_urls)) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN');
@@ -1389,8 +1399,9 @@ class SecureController extends Controller
     }
     public function CreateBillPlan(Request $request)
     {
-        $explode_url = explode(',', config('app.habukhan_app_key'));
-        if (in_array($request->headers->get('origin'), $explode_url)) {
+        $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
+        $origin = rtrim($request->headers->get('origin'), '/');
+        if (!$origin || in_array($origin, $allowed_urls)) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN');
@@ -1480,8 +1491,9 @@ class SecureController extends Controller
     }
     public function EditBillPlan(Request $request)
     {
-        $explode_url = explode(',', config('app.habukhan_app_key'));
-        if (in_array($request->headers->get('origin'), $explode_url)) {
+        $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
+        $origin = rtrim($request->headers->get('origin'), '/');
+        if (!$origin || in_array($origin, $allowed_urls)) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN');
@@ -1608,8 +1620,9 @@ class SecureController extends Controller
     }
     public function EditeNetwork(Request $request)
     {
-        $explode_url = explode(',', config('app.habukhan_app_key'));
-        if (in_array($request->headers->get('origin'), $explode_url)) {
+        $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
+        $origin = rtrim($request->headers->get('origin'), '/');
+        if (!$origin || in_array($origin, $allowed_urls)) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN');
@@ -2442,8 +2455,9 @@ class SecureController extends Controller
     public function ResetPasswordUser(Request $request)
     {
 
-        $explode_url = explode(',', config('app.habukhan_app_key'));
-        if (in_array($request->headers->get('origin'), $explode_url)) {
+        $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
+        $origin = rtrim($request->headers->get('origin'), '/');
+        if (!$origin || in_array($origin, $allowed_urls)) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)]);
                 if ($check_user->count() == 1) {
@@ -2499,8 +2513,9 @@ class SecureController extends Controller
     }
     public function ChangePin(Request $request)
     {
-        $explode_url = explode(',', config('app.habukhan_app_key'));
-        if (in_array($request->headers->get('origin'), $explode_url)) {
+        $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
+        $origin = rtrim($request->headers->get('origin'), '/');
+        if (!$origin || in_array($origin, $allowed_urls)) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)]);
                 if ($check_user->count() == 1) {
@@ -2553,8 +2568,9 @@ class SecureController extends Controller
     }
     public function CreatePin(Request $request)
     {
-        $explode_url = explode(',', config('app.habukhan_app_key'));
-        if (in_array($request->headers->get('origin'), $explode_url)) {
+        $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
+        $origin = rtrim($request->headers->get('origin'), '/');
+        if (!$origin || in_array($origin, $allowed_urls)) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)]);
                 if ($check_user->count() == 1) {
@@ -2606,8 +2622,9 @@ class SecureController extends Controller
     }
     public function UserAccountDetails(Request $request)
     {
-        $explode_url = explode(',', config('app.habukhan_app_key'));
-        if (in_array($request->headers->get('origin'), $explode_url)) {
+        $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
+        $origin = rtrim($request->headers->get('origin'), '/');
+        if (!$origin || in_array($origin, $allowed_urls)) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)]);
                 if ($check_user->count() == 1) {
@@ -2679,8 +2696,9 @@ class SecureController extends Controller
     }
     public function UsersAccountDetails(Request $request)
     {
-        $explode_url = explode(',', config('app.habukhan_app_key'));
-        if (in_array($request->headers->get('origin'), $explode_url)) {
+        $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
+        $origin = rtrim($request->headers->get('origin'), '/');
+        if (!$origin || in_array($origin, $allowed_urls)) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)]);
                 if ($check_user->count() == 1) {
@@ -2786,8 +2804,9 @@ class SecureController extends Controller
     }
     public function StockBalance(Request $request)
     {
-        $explode_url = explode(',', config('app.habukhan_app_key'));
-        if (!$request->headers->get('origin') || in_array($request->headers->get('origin'), $explode_url)) {
+        $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
+        $origin = rtrim($request->headers->get('origin'), '/');
+        if (!$origin || in_array($origin, $allowed_urls)) {
             if (!empty($request->id)) {
                 if (DB::table('user')->where(['id' => $this->verifytoken($request->id)])->count() == 1) {
                     $user = DB::table('user')->where(['id' => $this->verifytoken($request->id)])->first();
@@ -2817,8 +2836,9 @@ class SecureController extends Controller
     }
     public function SOFTWARE(Request $request)
     {
-        $explode_url = explode(',', config('app.habukhan_app_key'));
-        if (!$request->headers->get('origin') || in_array($request->headers->get('origin'), $explode_url)) {
+        $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
+        $origin = rtrim($request->headers->get('origin'), '/');
+        if (!$origin || in_array($origin, $allowed_urls)) {
 
 
             return response()->json([
@@ -2835,8 +2855,9 @@ class SecureController extends Controller
     }
     public function SystemInfo(Request $request)
     {
-        $explode_url = explode(',', config('app.habukhan_app_key'));
-        if (!$request->headers->get('origin') || in_array($request->headers->get('origin'), $explode_url)) {
+        $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
+        $origin = rtrim($request->headers->get('origin'), '/');
+        if (!$origin || in_array($origin, $allowed_urls)) {
             if (!empty($request->id)) {
                 if (DB::table('user')->where(['id' => $this->verifytoken($request->id)])->count() == 1) {
                     $user = DB::table('user')->where(['id' => $this->verifytoken($request->id)])->first();
@@ -2889,8 +2910,9 @@ class SecureController extends Controller
     }
     public function SytemMessage(Request $request)
     {
-        $explode_url = explode(',', config('app.habukhan_app_key'));
-        if (!$request->headers->get('origin') || in_array($request->headers->get('origin'), $explode_url)) {
+        $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
+        $origin = rtrim($request->headers->get('origin'), '/');
+        if (!$origin || in_array($origin, $allowed_urls)) {
             if (!empty($request->id)) {
                 if (DB::table('user')->where(['id' => $this->verifytoken($request->id)])->count() == 1) {
                     $user = DB::table('user')->where(['id' => $this->verifytoken($request->id)])->first();
@@ -2951,8 +2973,9 @@ class SecureController extends Controller
     }
     public function DeleteFeature(Request $request)
     {
-        $explode_url = explode(',', config('app.habukhan_app_key'));
-        if (!$request->headers->get('origin') || in_array($request->headers->get('origin'), $explode_url)) {
+        $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
+        $origin = rtrim($request->headers->get('origin'), '/');
+        if (!$origin || in_array($origin, $allowed_urls)) {
             if (!empty($request->id)) {
                 if (DB::table('user')->where(['id' => $this->verifytoken($request->id)])->count() == 1) {
                     $user = DB::table('user')->where(['id' => $this->verifytoken($request->id)])->first();
@@ -2993,8 +3016,9 @@ class SecureController extends Controller
     }
     public function AddFeature(Request $request)
     {
-        $explode_url = explode(',', config('app.habukhan_app_key'));
-        if (!$request->headers->get('origin') || in_array($request->headers->get('origin'), $explode_url)) {
+        $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
+        $origin = rtrim($request->headers->get('origin'), '/');
+        if (!$origin || in_array($origin, $allowed_urls)) {
             if (!empty($request->id)) {
                 if (DB::table('user')->where(['id' => $this->verifytoken($request->id)])->count() == 1) {
                     $user = DB::table('user')->where(['id' => $this->verifytoken($request->id)])->first();
@@ -3035,8 +3059,9 @@ class SecureController extends Controller
 
     public function DeleteApp(Request $request)
     {
-        $explode_url = explode(',', config('app.habukhan_app_key'));
-        if (!$request->headers->get('origin') || in_array($request->headers->get('origin'), $explode_url)) {
+        $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
+        $origin = rtrim($request->headers->get('origin'), '/');
+        if (!$origin || in_array($origin, $allowed_urls)) {
             if (!empty($request->id)) {
                 if (DB::table('user')->where(['id' => $this->verifytoken($request->id)])->count() == 1) {
                     $user = DB::table('user')->where(['id' => $this->verifytoken($request->id)])->first();
@@ -3077,8 +3102,9 @@ class SecureController extends Controller
     }
     public function NewApp(Request $request)
     {
-        $explode_url = explode(',', config('app.habukhan_app_key'));
-        if (!$request->headers->get('origin') || in_array($request->headers->get('origin'), $explode_url)) {
+        $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
+        $origin = rtrim($request->headers->get('origin'), '/');
+        if (!$origin || in_array($origin, $allowed_urls)) {
             if (!empty($request->id)) {
                 if (DB::table('user')->where(['id' => $this->verifytoken($request->id)])->count() == 1) {
                     $user = DB::table('user')->where(['id' => $this->verifytoken($request->id)])->first();
@@ -3118,8 +3144,9 @@ class SecureController extends Controller
     }
     public function PaymentInfo(Request $request)
     {
-        $explode_url = explode(',', config('app.habukhan_app_key'));
-        if (!$request->headers->get('origin') || in_array($request->headers->get('origin'), $explode_url)) {
+        $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
+        $origin = rtrim($request->headers->get('origin'), '/');
+        if (!$origin || in_array($origin, $allowed_urls)) {
             if (!empty($request->id)) {
                 if (DB::table('user')->where(['id' => $this->verifytoken($request->id)])->count() == 1) {
                     $user = DB::table('user')->where(['id' => $this->verifytoken($request->id)])->first();
@@ -3212,8 +3239,9 @@ class SecureController extends Controller
     }
     public function ChangePPassword(Request $request)
     {
-        $explode_url = explode(',', config('app.habukhan_app_key'));
-        if (!$request->headers->get('origin') || in_array($request->headers->get('origin'), $explode_url)) {
+        $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
+        $origin = rtrim($request->headers->get('origin'), '/');
+        if (!$origin || in_array($origin, $allowed_urls)) {
             $otp_to_check = $request->otp ?? $request->id;
             $user_d = DB::table('user')->where(['status' => 1, 'otp' => $otp_to_check]);
             if ($user_d->count() == 1) {
@@ -3251,8 +3279,9 @@ class SecureController extends Controller
     }
     public function InviteUser(Request $request)
     {
-        $explode_url = explode(',', config('app.habukhan_app_key'));
-        if (!$request->headers->get('origin') || in_array($request->headers->get('origin'), $explode_url)) {
+        $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
+        $origin = rtrim($request->headers->get('origin'), '/');
+        if (!$origin || in_array($origin, $allowed_urls)) {
             if (!empty($request->id)) {
                 if (DB::table('user')->where(['id' => $this->verifytoken($request->id)])->count() == 1) {
                     $user = DB::table('user')->where(['id' => $this->verifytoken($request->id)])->first();
