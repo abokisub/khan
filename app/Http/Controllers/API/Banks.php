@@ -28,84 +28,92 @@ class Banks extends Controller
                 if (!$auth_user) {
                     return response()->json(['message' => 'Unable to singin user', 'status' => 'fail'], 403);
                 }
-                // Use dynamic charges from settings
+
+                // Charges
                 $monnify_charge = isset($setting->monnify_charge) ? $setting->monnify_charge : 20;
                 $paystack_charge = isset($setting->paystack_charge) ? $setting->paystack_charge : 0;
                 $paymentpoint_charge = isset($setting->paymentpoint_charge) ? $setting->paymentpoint_charge : 60;
                 $xixapay_charge = isset($setting->xixapay_charge) ? $setting->xixapay_charge : 60;
 
-                // Determine active PalmPay provider charge
-                $habukhan_key = DB::table('habukhan_key')->first();
-                // If PaymentPoint credentials exist, prioritize its charge for PalmPay entries
-                $palmpay_charge = (!empty($habukhan_key->plive)) ? $paymentpoint_charge : $xixapay_charge;
+                // Determine active PalmPay provider charge logic if needed, but per-provider charge is clearer below
 
-                // Fetch settings to check enabled providers
-                try {
-                    $settings = DB::table('settings')->select(
-                        'palmpay_enabled',
-                        'monnify_enabled',
-                        'wema_enabled',
-                        'xixapay_enabled'
-                    )->first();
-
-                    $monnify_enabled = $settings->monnify_enabled ?? true;
-                    $wema_enabled = $settings->wema_enabled ?? true;
-                    $xixapay_enabled = $settings->xixapay_enabled ?? true;
-                    $palmpay_enabled = $settings->palmpay_enabled ?? true;
-                } catch (\Exception $e) {
-                    $monnify_enabled = true;
-                    $wema_enabled = true;
-                    $xixapay_enabled = true;
-                    $palmpay_enabled = true;
-                }
+                // Fetch Sorted Locks
+                $locks = DB::table('virtual_account_locks')
+                    ->orderBy('sort_order', 'asc')
+                    ->orderBy('id', 'asc')
+                    ->get();
 
                 $banks_array = [];
 
-                // 1. PalmPay
-                if (!is_null($auth_user->palmpay) && $palmpay_enabled) {
-                    $banks_array[] = [
-                        "name" => "PALMPAY",
-                        "account" => $auth_user->palmpay,
-                        "accountType" => false,
-                        'charges' => $palmpay_charge . ' NAIRA',
-                    ];
-                }
+                foreach ($locks as $lock) {
+                    // Skip if locked (is_locked means true)
+                    if ($lock->is_locked)
+                        continue;
 
-                // 2. Wema (using standardized paystack_account)
-                if (!is_null($auth_user->paystack_account) && $wema_enabled) {
-                    $banks_array[] = [
-                        "name" => "WEMA BANK",
-                        "account" => $auth_user->paystack_account,
-                        "accountType" => false,
-                        'charges' => $paystack_charge . ' NAIRA',
-                    ];
-                }
-
-                // 3. Moniepoint (from standardized user_bank table)
-                if ($monnify_enabled) {
-                    $moniepoint = DB::table('user_bank')
-                        ->where('username', $auth_user->username)
-                        ->where('bank', 'MONIEPOINT')
-                        ->first();
-
-                    if ($moniepoint) {
-                        $banks_array[] = [
-                            "name" => "MONIEPOINT",
-                            "account" => $moniepoint->account_number,
-                            "accountType" => false,
-                            'charges' => $monnify_charge . '%',
-                        ];
+                    // 1. Xixapay (Palmpay)
+                    if ($lock->provider === 'xixapay' && $lock->account_type === 'palmpay') {
+                        if (!empty($auth_user->palmpay)) {
+                            $banks_array[] = [
+                                "name" => "PALMPAY",
+                                "account" => $auth_user->palmpay,
+                                "accountType" => false,
+                                'charges' => $xixapay_charge . ' NAIRA',
+                            ];
+                        }
                     }
-                }
 
-                // 4. Kolomoni MFB
-                if (!is_null($auth_user->kolomoni_mfb) && $xixapay_enabled) {
-                    $banks_array[] = [
-                        "name" => "KOLOMONI MFB",
-                        "account" => $auth_user->kolomoni_mfb,
-                        "accountType" => false,
-                        'charges' => $palmpay_charge . ' NAIRA',
-                    ];
+                    // 2. PaymentPoint (Palmpay)
+                    if ($lock->provider === 'paymentpoint' && $lock->account_type === 'palmpay') {
+                        if (!empty($auth_user->paymentpoint_account_number)) {
+                            $banks_array[] = [
+                                "name" => "PAYMENTPOINT", // Distinct name
+                                "account" => $auth_user->paymentpoint_account_number,
+                                "accountType" => false,
+                                'charges' => $paymentpoint_charge . ' NAIRA',
+                            ];
+                        }
+                    }
+
+                    // 3. Paystack (Wema) - mapped to wema account_type in locks
+                    if ($lock->provider === 'paystack' && $lock->account_type === 'wema') {
+                        if (!empty($auth_user->paystack_account)) {
+                            $banks_array[] = [
+                                "name" => "WEMA BANK",
+                                "account" => $auth_user->paystack_account,
+                                "accountType" => false,
+                                'charges' => $paystack_charge . ' NAIRA',
+                            ];
+                        }
+                    }
+
+                    // 4. Monnify (Moniepoint)
+                    if ($lock->provider === 'monnify' && $lock->account_type === 'monniepoint') { // Note spelling 'monniepoint' in locks logic
+                        $moniepoint = DB::table('user_bank')
+                            ->where('username', $auth_user->username)
+                            ->where('bank', 'MONIEPOINT')
+                            ->first();
+
+                        if ($moniepoint) {
+                            $banks_array[] = [
+                                "name" => "MONIEPOINT",
+                                "account" => $moniepoint->account_number,
+                                "accountType" => false,
+                                'charges' => $monnify_charge . '%', // Percentage charge
+                            ];
+                        }
+                    }
+
+                    // 5. Xixapay (Kolomoni)
+                    if ($lock->provider === 'xixapay' && $lock->account_type === 'kolomonie') { // Note spelling 'kolomonie' 
+                        if (!empty($auth_user->kolomoni_mfb)) {
+                            $banks_array[] = [
+                                "name" => "KOLOMONI MFB",
+                                "account" => $auth_user->kolomoni_mfb,
+                                "accountType" => false,
+                                'charges' => $xixapay_charge . ' NAIRA',
+                            ];
+                        }
+                    }
                 }
 
                 return response()->json(['status' => 'success', 'banks' => $banks_array]);

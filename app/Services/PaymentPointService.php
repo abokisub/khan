@@ -30,10 +30,11 @@ class PaymentPointService
     {
         try {
             $response = Http::withHeaders([
-                'Authorization' => $this->apiSecret,
+                'Authorization' => 'Bearer ' . $this->apiSecret,
                 'api-key' => $this->apiKey,
                 'Content-Type' => 'application/json',
-            ])->post($this->baseUrl . '/api/v1/createVirtualAccount', [
+                'User-Agent' => 'AmtPay/1.0',
+            ])->timeout(30)->withOptions(['verify' => false])->post($this->baseUrl . '/api/v1/createVirtualAccount', [
                         'email' => $user->email,
                         'name' => $user->name,
                         'phoneNumber' => $user->phone,
@@ -67,7 +68,8 @@ class PaymentPointService
 
             Log::error('PaymentPoint account creation failed', [
                 'user_id' => $user->id,
-                'response' => $response->json(),
+                'status' => $response->status(),
+                'body' => $response->body(),
             ]);
 
             return null;
