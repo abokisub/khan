@@ -1,11 +1,11 @@
 ﻿@php
-$manifestPath = public_path('asset-manifest.json');
-$manifest = [];
-if (file_exists($manifestPath)) {
-$manifest = json_decode(file_get_contents($manifestPath), true)['files'] ?? [];
-}
-$mainJs = $manifest['main.js'] ?? '';
-$mainCss = $manifest['main.css'] ?? '';
+    $manifestPath = public_path('asset-manifest.json');
+    $manifest = [];
+    if (file_exists($manifestPath)) {
+        $manifest = json_decode(file_get_contents($manifestPath), true)['files'] ?? [];
+    }
+    $mainJs = $manifest['main.js'] ?? '';
+    $mainCss = $manifest['main.css'] ?? '';
 @endphp
 <!doctype html>
 <html lang="en">
@@ -27,11 +27,24 @@ $mainCss = $manifest['main.css'] ?? '';
     <title>KoboPoint</title>
 
     @if($mainCss)
-    <link href="{{ $mainCss }}" rel="stylesheet">
+        <link href="{{ $mainCss }}" rel="stylesheet">
     @endif
 
     @if($mainJs)
-    <script defer="defer" src="{{ $mainJs }}"></script>
+        <script defer="defer" src="{{ $mainJs }}"></script>
+        <script>
+            // Cache-Nuke: Force refresh if the build version changes
+            (function () {
+                const currentVersion = "{{ $mainJs }}";
+                const savedVersion = localStorage.getItem('app_version');
+                if (savedVersion && savedVersion !== currentVersion) {
+                    localStorage.setItem('app_version', currentVersion);
+                    window.location.reload(true);
+                } else {
+                    localStorage.setItem('app_version', currentVersion);
+                }
+            })();
+        </script>
     @endif
 </head>
 
