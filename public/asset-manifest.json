@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/static/css/main.556e3caf.css",
-    "main.js": "/static/js/main.bb20496b.js",
+    "main.js": "/static/js/main.26da3750.js",
     "static/js/6776.7268cb9a.chunk.js": "/static/js/6776.7268cb9a.chunk.js",
     "static/js/8971.d4b2ee0d.chunk.js": "/static/js/8971.d4b2ee0d.chunk.js",
     "static/js/9290.44f31cdb.chunk.js": "/static/js/9290.44f31cdb.chunk.js",
@@ -201,14 +201,14 @@
     "static/js/8348.5cd687ec.chunk.js": "/static/js/8348.5cd687ec.chunk.js",
     "static/js/2484.ed4ec331.chunk.js": "/static/js/2484.ed4ec331.chunk.js",
     "static/js/3697.547f4c53.chunk.js": "/static/js/3697.547f4c53.chunk.js",
-    "static/js/8669.ec5ff87d.chunk.js": "/static/js/8669.ec5ff87d.chunk.js",
+    "static/js/8669.11bc1b9b.chunk.js": "/static/js/8669.11bc1b9b.chunk.js",
     "static/media/slick.svg": "/static/media/slick.2630a3e3eab21c607e21.svg",
     "static/media/slick.eot": "/static/media/slick.a4e97f5a2a64f0ab1323.eot",
     "static/media/slick.ttf": "/static/media/slick.c94f7671dcc99dce43e2.ttf",
     "static/media/slick.woff": "/static/media/slick.295183786cd8a1389865.woff",
     "index.html": "/index.html",
     "main.556e3caf.css.map": "/static/css/main.556e3caf.css.map",
-    "main.bb20496b.js.map": "/static/js/main.bb20496b.js.map",
+    "main.26da3750.js.map": "/static/js/main.26da3750.js.map",
     "6776.7268cb9a.chunk.js.map": "/static/js/6776.7268cb9a.chunk.js.map",
     "8971.d4b2ee0d.chunk.js.map": "/static/js/8971.d4b2ee0d.chunk.js.map",
     "9290.44f31cdb.chunk.js.map": "/static/js/9290.44f31cdb.chunk.js.map",
@@ -408,10 +408,10 @@
     "8348.5cd687ec.chunk.js.map": "/static/js/8348.5cd687ec.chunk.js.map",
     "2484.ed4ec331.chunk.js.map": "/static/js/2484.ed4ec331.chunk.js.map",
     "3697.547f4c53.chunk.js.map": "/static/js/3697.547f4c53.chunk.js.map",
-    "8669.ec5ff87d.chunk.js.map": "/static/js/8669.ec5ff87d.chunk.js.map"
+    "8669.11bc1b9b.chunk.js.map": "/static/js/8669.11bc1b9b.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.556e3caf.css",
-    "static/js/main.bb20496b.js"
+    "static/js/main.26da3750.js"
   ]
 }
