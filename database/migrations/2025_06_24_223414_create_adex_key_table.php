@@ -12,7 +12,7 @@ return new class extends Migration {
      */
     public function up()
     {
-        Schema::create('adex_key', function (Blueprint $table) {
+        Schema::create('habukhan_key', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('account_number', 20);
             $table->string('account_name', 100);
@@ -30,6 +30,6 @@ return new class extends Migration {
      */
     public function down()
     {
-        Schema::dropIfExists('adex_key');
+        Schema::dropIfExists('habukhan_key');
     }
 };

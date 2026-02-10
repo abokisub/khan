@@ -42,7 +42,7 @@ return new class extends Migration {
             $table->string('bvn', 11)->nullable();
             $table->string('monify_ref', 255)->nullable();
             $table->string('palmpay', 255)->nullable();
-            $table->string('adex_key', 255)->nullable();
+            $table->string('habukhan_key', 255)->nullable();
             $table->string('app_key', 255)->nullable();
             $table->string('paystack_account', 255)->nullable();
             $table->string('paystack_bank', 255)->nullable();
