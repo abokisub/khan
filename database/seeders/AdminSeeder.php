@@ -17,15 +17,15 @@ class AdminSeeder extends Seeder
     public function run()
     {
         // Check if admin already exists to prevent duplicates
-        $admin = DB::table('user')->where('username', '@Habukhan2025')->first();
+        $admin = DB::table('user')->where('username', 'Habukhan')->first();
 
         if (!$admin) {
             DB::table('user')->insert([
                 'name' => 'Habukhan Admin',
-                'username' => '@Habukhan2025',
+                'username' => 'Habukhan',
                 'email' => 'admin@amtpay.com.ng',
                 'phone' => '08000000000',
-                'password' => Hash::make('Habukhan'),
+                'password' => Hash::make('@Habukhan2025'),
                 'pin' => 1234,
                 'type' => 'ADMIN', // Ensuring admin role
                 'status' => 1, // Active
@@ -38,9 +38,9 @@ class AdminSeeder extends Seeder
                 // Add other necessary default fields based on schema if needed
                 'apikey' => bin2hex(random_bytes(16)),
             ]);
-            $this->command->info('Admin account @Habukhan2025 created successfully.');
+            $this->command->info('Admin account Habukhan created successfully.');
         } else {
-            $this->command->info('Admin account @Habukhan2025 already exists.');
+            $this->command->info('Admin account Habukhan already exists.');
         }
     }
 }
