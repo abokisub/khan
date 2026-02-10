@@ -2,8 +2,9 @@
 frontend/
 Kobopoint\ Mobile/
 node_modules/
+scripts_backup/
 
-# Standard Laravel ignores (preserving only requested core files)
+# Standard Laravel ignores
 .env
 .env.*
 .phpunit.result.cache
@@ -12,6 +13,7 @@ storage/framework/cache/data/*
 storage/framework/sessions/*
 storage/framework/views/*
 storage/logs/*
+storage/*.key
 
 # IDE and OS
 .idea
