@@ -2,10 +2,13 @@
     $manifestPath = public_path('asset-manifest.json');
     $manifest = [];
     if (file_exists($manifestPath)) {
-        $manifest = json_decode(file_get_contents($manifestPath), true)['files'] ?? [];
+        $manifestData = json_decode(file_get_contents($manifestPath), true);
+        $manifest = $manifestData['files'] ?? [];
     }
-    $mainJs = $manifest['main.js'] ?? '';
-    $mainCss = $manifest['main.css'] ?? '';
+    
+    // Ensure absolute paths from manifest or empty string
+    $mainJs = isset($manifest['main.js']) ? asset($manifest['main.js']) : '';
+    $mainCss = isset($manifest['main.css']) ? asset($manifest['main.css']) : '';
 @endphp
 <!doctype html>
 <html lang="en">
@@ -24,7 +27,38 @@
     <meta name="description" content="KoboPoint - Digital Services Platform" />
     <link rel="apple-touch-icon" href="/logo192.png" />
     <link rel="manifest" href="/manifest.json" />
-    <title>KoboPoint</title>
+    <title>{{ env('APP_NAME', 'KoboPoint') }}</title>
+
+    <script>
+        // Professional Cache-Nuke: Force users to discard old design caches
+        (function () {
+            // 1. Unregister Service Workers
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(function (registrations) {
+                    for (let registration of registrations) {
+                        registration.unregister();
+                    }
+                });
+            }
+
+            // 2. Clear old App Caches
+            if (window.caches) {
+                caches.keys().then(function (names) {
+                    for (let name of names) caches.delete(name);
+                });
+            }
+
+            // 3. Version Enforcement (Reload if build version changes)
+            const currentVersion = "{{ $mainJs }}";
+            const savedVersion = localStorage.getItem('app_version');
+            if (savedVersion && savedVersion !== currentVersion) {
+                localStorage.setItem('app_version', currentVersion);
+                window.location.reload(true);
+            } else {
+                localStorage.setItem('app_version', currentVersion);
+            }
+        })();
+    </script>
 
     @if($mainCss)
         <link href="{{ $mainCss }}" rel="stylesheet">
@@ -32,19 +66,6 @@
 
     @if($mainJs)
         <script defer="defer" src="{{ $mainJs }}"></script>
-        <script>
-            // Cache-Nuke: Force refresh if the build version changes
-            (function () {
-                const currentVersion = "{{ $mainJs }}";
-                const savedVersion = localStorage.getItem('app_version');
-                if (savedVersion && savedVersion !== currentVersion) {
-                    localStorage.setItem('app_version', currentVersion);
-                    window.location.reload(true);
-                } else {
-                    localStorage.setItem('app_version', currentVersion);
-                }
-            })();
-        </script>
     @endif
 </head>
 
