@@ -1,22 +1,20 @@
-# Ignore frontend and mobile (large)
-frontend/
-Kobopoint\ Mobile/
-node_modules/
-scripts_backup/
-
-# Standard Laravel ignores
+/node_modules
+/public/hot
+/public/storage
+/storage/*.key
+/vendor
 .env
-.env.*
+.env.backup
+.env.production
 .phpunit.result.cache
-public/storage
-storage/framework/cache/data/*
-storage/framework/sessions/*
-storage/framework/views/*
-storage/logs/*
-storage/*.key
-
-# IDE and OS
-.idea
-.vscode
-.DS_Store
-Thumbs.db
+homestead.json
+Homestead.yaml
+npm-debug.log
+yarn-error.log
+/.idea
+/.vscode
+/frontend
+/Kobopoint Mobile
+/scripts_backup
+/public/static/js/*.map
+/public/static/css/*.map
