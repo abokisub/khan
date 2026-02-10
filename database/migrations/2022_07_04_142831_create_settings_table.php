@@ -51,9 +51,16 @@ return new class extends Migration {
             $table->boolean('monnify_enabled')->default(true);
             $table->boolean('wema_enabled')->default(true);
             $table->boolean('xixapay_enabled')->default(true);
-            $table->text('ads_message')->nullable();
-            $table->boolean('ads_show')->default(0);
-            $table->boolean('app_notif_show')->default(1);
+            $table->decimal('referral_price', 10, 2)->default(1.00);
+            $table->string('version', 20)->default('1.0.0');
+            $table->string('update_url', 255)->nullable();
+            $table->string('playstore_url', 255)->nullable();
+            $table->string('appstore_url', 255)->nullable();
+            $table->string('app_update_title', 255)->nullable();
+            $table->text('app_update_desc')->nullable();
+            $table->boolean('maintenance')->default(false);
+            $table->text('notif_message')->nullable();
+            $table->boolean('notif_show')->default(false);
 
             $table->timestamps();
         });
