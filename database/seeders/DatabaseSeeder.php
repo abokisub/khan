@@ -15,8 +15,10 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             UnifiedBanksSeeder::class,
-            AdminSeeder::class,
             SystemSettingsSeeder::class,
+            AdminUserSeeder::class,
+            FaqSeeder::class,
+            SystemLocksSeeder::class,
         ]);
     }
 }

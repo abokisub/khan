@@ -39,13 +39,14 @@ class NotificationService
                     $data['title'],
                     $data['message'],
                     array_merge($data['payload'] ?? [], [
-                        'click_action' => 'FLUTTER_NOTIFICATION_CLICK',
-                        'type' => $data['type'] ?? 'general'
-                    ]),
+                    'click_action' => 'FLUTTER_NOTIFICATION_CLICK',
+                    'type' => $data['type'] ?? 'general'
+                ]),
                     $image
                 );
             }
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
             Log::error("Notification Delivery Failed: " . $e->getMessage(), [
                 'user' => $user->username,
                 'type' => $data['type'] ?? 'unspecified'
@@ -248,7 +249,7 @@ class NotificationService
     {
         $this->storeAndPush($user, [
             'type' => 'welcome',
-            'title' => "🎉 Welcome to AmtPay!",
+            'title' => "🎉 Welcome to KoboPoint!",
             'message' => "Hi {$user->name}, welcome aboard! Your account has been created successfully. Start enjoying seamless transactions today!"
         ]);
     }
@@ -261,7 +262,7 @@ class NotificationService
         $this->storeAndPush($user, [
             'type' => 'login',
             'title' => "👋 Welcome Back!",
-            'message' => "Hi {$user->name}, you've successfully logged in to your AmtPay account."
+            'message' => "Hi {$user->name}, you've successfully logged in to your KoboPoint account."
         ]);
     }
 
@@ -299,7 +300,8 @@ class NotificationService
         if ($status === 'approved') {
             $title = "KYC Approved";
             $message = "Congratulations! Your KYC verification has been approved. You now have full access.";
-        } else {
+        }
+        else {
             $title = "KYC Update";
             $message = "Your KYC status is {$status}." . ($reason ? " Reason: {$reason}" : "");
         }

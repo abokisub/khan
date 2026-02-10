@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('wallet_funding', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->string('username', 20);
+            $table->string('username', 12);
             $table->decimal('amount', 10, 2);
             $table->string('payment_method', 50);
             $table->string('reference', 100)->unique();

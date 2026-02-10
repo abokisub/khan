@@ -13,9 +13,9 @@ class AppController extends Controller
     public function system(Request $request)
     {
         try {
-            $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
-            $origin = rtrim($request->headers->get('origin'), '/');
-            if (!$origin || in_array($origin, $allowed_urls) || $origin === rtrim($request->getSchemeAndHttpHost(), "/")) {
+            $explode_url = explode(',', config('app.habukhan_app_key'));
+            $origin = $request->headers->get('origin');
+            if (!$origin || in_array($origin, $explode_url)) {
                 return response()->json([
                     'status' => 'success',
                     'setting' => $this->core(),
@@ -29,15 +29,17 @@ class AppController extends Controller
                         'support_whatsapp' => optional($this->general())->app_phone ?? '+2348139123922'
                     ]
                 ]);
-            } else {
+            }
+            else {
                 return response()->json([
                     'status' => 'error',
                     'message' => 'Origin validation failed. Please check your .env configuration.',
                     'origin' => $origin,
-                    'allowed' => $allowed_urls
+                    'allowed' => $explode_url
                 ], 403);
             }
-        } catch (\Throwable $e) {
+        }
+        catch (\Throwable $e) {
             return response()->json([
                 'status' => 500,
                 'message' => 'System Crash: ' . $e->getMessage(),
@@ -62,9 +64,9 @@ class AppController extends Controller
 
     public function getDiscountOther(Request $request)
     {
-        $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
-        $origin = rtrim($request->headers->get('origin'), '/');
-        if (!$origin || in_array($origin, $allowed_urls) || $origin === rtrim($request->getSchemeAndHttpHost(), "/")) {
+        $explode_url = explode(',', config('app.habukhan_app_key'));
+        $origin = $request->headers->get('origin');
+        if (!$origin || in_array($origin, $explode_url)) {
             $settings = DB::table('settings')->select('monnify_charge', 'xixapay_charge', 'paystack_charge')->first();
             $cardSettings = DB::table('card_settings')->where('id', 1)->first();
 
@@ -83,7 +85,8 @@ class AppController extends Controller
                 'vcard_usd_fund_fee' => $cardSettings->usd_funding_fee_percent ?? 2,
                 'vcard_ngn_failed_fee' => $cardSettings->ngn_failed_tx_fee ?? 0,
             ]);
-        } else {
+        }
+        else {
             return response()->json([
                 'status' => 403,
                 'message' => 'Unable to Authenticate System'
@@ -93,9 +96,9 @@ class AppController extends Controller
 
     public function getDiscountSystem(Request $request)
     {
-        $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
-        $origin = rtrim($request->headers->get('origin'), '/');
-        if (!$origin || in_array($origin, $allowed_urls) || $origin === rtrim($request->getSchemeAndHttpHost(), "/")) {
+        $explode_url = explode(',', config('app.habukhan_app_key'));
+        $origin = $request->headers->get('origin');
+        if (!$origin || in_array($origin, $explode_url)) {
             $settings = DB::table('settings')->first();
             return response()->json([
                 'status' => 'success',
@@ -105,9 +108,10 @@ class AppController extends Controller
                 'appstore_url' => $settings->appstore_url ?? '',
                 'update_title' => $settings->app_update_title ?? '',
                 'update_desc' => $settings->app_update_desc ?? '',
-                'maintenance' => (bool) ($settings->maintenance ?? false),
+                'maintenance' => (bool)($settings->maintenance ?? false),
             ]);
-        } else {
+        }
+        else {
             return response()->json([
                 'status' => 403,
                 'message' => 'Unable to Authenticate System'
@@ -117,9 +121,9 @@ class AppController extends Controller
 
     public function getDiscountBanks(Request $request)
     {
-        $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
-        $origin = rtrim($request->headers->get('origin'), '/');
-        if (!$origin || in_array($origin, $allowed_urls) || $origin === rtrim($request->getSchemeAndHttpHost(), "/")) {
+        $explode_url = explode(',', config('app.habukhan_app_key'));
+        $origin = $request->headers->get('origin');
+        if (!$origin || in_array($origin, $explode_url)) {
             $settings = DB::table('settings')->select(
                 'transfer_charge_type',
                 'transfer_charge_value',
@@ -130,11 +134,12 @@ class AppController extends Controller
                 'status' => 'success',
                 'data' => [
                     'transfer_charge_type' => $settings->transfer_charge_type ?? 'FLAT',
-                    'transfer_charge_value' => (float) ($settings->transfer_charge_value ?? 0),
-                    'transfer_charge_cap' => (float) ($settings->transfer_charge_cap ?? 0),
+                    'transfer_charge_value' => (float)($settings->transfer_charge_value ?? 0),
+                    'transfer_charge_cap' => (float)($settings->transfer_charge_cap ?? 0),
                 ]
             ]);
-        } else {
+        }
+        else {
             return response()->json([
                 'status' => 403,
                 'message' => 'Unable to Authenticate System'
@@ -144,9 +149,9 @@ class AppController extends Controller
 
     public function getVirtualAccountStatus(Request $request)
     {
-        $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
-        $origin = rtrim($request->headers->get('origin'), '/');
-        if (!$origin || in_array($origin, $allowed_urls) || $origin === rtrim($request->getSchemeAndHttpHost(), "/")) {
+        $explode_url = explode(',', config('app.habukhan_app_key'));
+        $origin = $request->headers->get('origin');
+        if (!$origin || in_array($origin, $explode_url)) {
             $settings = DB::table('settings')->select(
                 'palmpay_enabled',
                 'monnify_enabled',
@@ -160,26 +165,27 @@ class AppController extends Controller
                 'status' => 'success',
                 'providers' => [
                     'palmpay' => [
-                        'enabled' => (bool) ($settings->palmpay_enabled ?? true),
+                        'enabled' => (bool)($settings->palmpay_enabled ?? true),
                         'is_default' => ($settings->default_virtual_account ?? 'palmpay') === 'palmpay'
                     ],
                     'monnify' => [
-                        'enabled' => (bool) ($settings->monnify_enabled ?? true),
+                        'enabled' => (bool)($settings->monnify_enabled ?? true),
                         'is_default' => ($settings->default_virtual_account ?? 'palmpay') === 'monnify'
                     ],
                     'wema' => [
-                        'enabled' => (bool) ($settings->wema_enabled ?? true),
+                        'enabled' => (bool)($settings->wema_enabled ?? true),
                         'is_default' => ($settings->default_virtual_account ?? 'palmpay') === 'wema'
                     ],
                     'xixapay' => [
-                        'enabled' => (bool) ($settings->xixapay_enabled ?? true),
+                        'enabled' => (bool)($settings->xixapay_enabled ?? true),
                         'is_default' => ($settings->default_virtual_account ?? 'palmpay') === 'xixapay'
                     ]
                 ],
                 'default_provider' => $settings->default_virtual_account ?? 'palmpay',
-                'transfer_lock_all' => (bool) ($settings->transfer_lock_all ?? false)
+                'transfer_lock_all' => (bool)($settings->transfer_lock_all ?? false)
             ]);
-        } else {
+        }
+        else {
             return response()->json([
                 'status' => 403,
                 'message' => 'Unable to Authenticate System'
@@ -189,9 +195,9 @@ class AppController extends Controller
 
     public function getDiscountCash(Request $request)
     {
-        $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
-        $origin = rtrim($request->headers->get('origin'), '/');
-        if (!$origin || in_array($origin, $allowed_urls) || $origin === rtrim($request->getSchemeAndHttpHost(), "/")) {
+        $explode_url = explode(',', config('app.habukhan_app_key'));
+        $origin = $request->headers->get('origin');
+        if (!$origin || in_array($origin, $explode_url)) {
             $discount = DB::table('cash_discount')->first();
             return response()->json([
                 'status' => 'success',
@@ -206,7 +212,8 @@ class AppController extends Controller
                     'mobile_status' => $discount->mobile_status ?? 1,
                 ]
             ]);
-        } else {
+        }
+        else {
             return response()->json([
                 'status' => 403,
                 'message' => 'Unable to Authenticate System'
@@ -217,9 +224,9 @@ class AppController extends Controller
 
     public function apiUpgrade(Request $request)
     {
-        $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
-        $origin = rtrim($request->headers->get('origin'), '/');
-        if (!$origin || in_array($origin, $allowed_urls) || $origin === rtrim($request->getSchemeAndHttpHost(), "/")) {
+        $explode_url = explode(',', config('app.habukhan_app_key'));
+        $origin = $request->headers->get('origin');
+        if (!$origin || in_array($origin, $explode_url)) {
             $validator = validator::make($request->all(), [
                 'username' => 'required|max:25',
                 'url' => 'required|url',
@@ -232,7 +239,8 @@ class AppController extends Controller
                     'message' => $validator->errors()->first(),
                     'status' => 403
                 ])->setStatusCode(403);
-            } else {
+            }
+            else {
                 //api user dat need upgrade
                 $check_me = [
                     'username' => $request->username,
@@ -279,26 +287,30 @@ class AppController extends Controller
                                 'status' => 'success',
                                 'message' => 'Your Request has been received and it will be processed within 3-5 days'
                             ]);
-                        } else {
+                        }
+                        else {
                             return response()->json([
                                 'status' => 403,
                                 'message' => 'System is unable to send request now',
                             ])->setStatusCode(403);
                         }
-                    } else {
+                    }
+                    else {
                         return response()->json([
                             'status' => 403,
                             'message' => 'Unable to get Admins',
                         ])->setStatusCode(403);
                     }
-                } else {
+                }
+                else {
                     return response()->json([
                         'status' => 403,
                         'message' => 'Unable to verify User'
                     ])->setStatusCode(403);
                 }
             }
-        } else {
+        }
+        else {
             return redirect(config('app.error_500'));
         }
     }
@@ -307,9 +319,9 @@ class AppController extends Controller
 
     public function buildWebsite(Request $request)
     {
-        $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
-        $origin = rtrim($request->headers->get('origin'), '/');
-        if (!$origin || in_array($origin, $allowed_urls) || $origin === rtrim($request->getSchemeAndHttpHost(), "/")) {
+        $explode_url = explode(',', config('app.habukhan_app_key'));
+        $origin = $request->headers->get('origin');
+        if (!$origin || in_array($origin, $explode_url)) {
             $validator = validator::make($request->all(), [
                 'username' => 'required|max:25',
                 'url' => 'required|url',
@@ -322,7 +334,8 @@ class AppController extends Controller
                     'message' => $validator->errors()->first(),
                     'status' => 403
                 ])->setStatusCode(403);
-            } else {
+            }
+            else {
                 $check_me = [
                     'username' => $request->username,
                     'status' => 1
@@ -397,70 +410,80 @@ class AppController extends Controller
                                                     'status' => 'success',
                                                     'message' => 'Your Request has been received and it will be processed within 3-5 days',
                                                 ]);
-                                            } else {
+                                            }
+                                            else {
                                                 return response()->json([
                                                     'status' => 403,
                                                     'message' => 'System is unable to send request now',
                                                 ])->setStatusCode(403);
                                             }
-                                        } else {
+                                        }
+                                        else {
                                             return response()->json([
                                                 'status' => 403,
                                                 'message' => 'Unable to get Admins',
                                             ])->setStatusCode(403);
                                         }
-                                    } else {
+                                    }
+                                    else {
                                         return response()->json([
                                             'status' => 403,
                                             'message' => 'Service Currently Not Avialable For You Right Now'
                                         ])->setStatusCode(403);
                                     }
-                                } else {
+                                }
+                                else {
                                     return response()->json([
                                         'status' => 403,
                                         'message' => 'Please Try Again After Few Mins'
                                     ]);
                                 }
-                            } else {
+                            }
+                            else {
                                 return response()->json([
                                     'status' => 403,
                                     'message' => 'Please Try Again After Few Mins'
                                 ]);
                             }
-                        } else {
+                        }
+                        else {
                             return response()->json([
                                 'status' => 403,
                                 'message' => 'Insufficient Account Fund Your Wallet And Try Again ~ ₦' . number_format($user->bal, 2)
                             ])->setStatusCode(403);
                         }
-                    } else {
+                    }
+                    else {
                         return response()->json([
                             'status' => 403,
                             'message' => 'System Is Unable to Detect Price'
                         ])->setStatusCode(403);
                     }
-                } else {
+                }
+                else {
                     return response()->json([
                         'status' => 403,
                         'message' => 'Unable to verify User',
                     ])->setStatusCode(403);
                 }
             }
-        } else {
+        }
+        else {
             return redirect(config('app.error_500'));
         }
     }
     public function AwufPackage(Request $request)
     {
-        $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
-        $origin = rtrim($request->headers->get('origin'), '/');
-        if (!$origin || in_array($origin, $allowed_urls) || $origin === rtrim($request->getSchemeAndHttpHost(), "/")) {
+        $explode_url = explode(',', config('app.habukhan_app_key'));
+        $origin = $request->headers->get('origin');
+        if (!$origin || in_array($origin, $explode_url)) {
             if (!isset($request->id)) {
                 return response()->json([
                     'message' => 'User ID Required',
                     'status' => 403
                 ])->setStatusCode(403);
-            } else {
+            }
+            else {
                 $check_me = [
                     'username' => $request->id,
                     'status' => 1
@@ -494,46 +517,53 @@ class AppController extends Controller
                                             'status' => 403,
                                             'message' => 'Account Upgraded To AWUF PACKAGE Successfully'
                                         ]);
-                                    } else {
+                                    }
+                                    else {
                                         $this->updateData(['bal' => $credit_user], 'user', ['username' => $user->username, 'id' => $user->id]);
                                         return response()->json([
                                             'status' => 403,
                                             'message' => 'Try Again Later'
                                         ])->setStatusCode(403);
                                     }
-                                } else {
+                                }
+                                else {
                                     $this->updateData(['bal' => $credit_user], 'user', ['username' => $user->username, 'id' => $user->id]);
                                     return response()->json([
                                         'status' => 403,
                                         'message' => 'Try Again Later'
                                     ])->setStatusCode(403);
                                 }
-                            } else {
+                            }
+                            else {
                                 return response()->json([
                                     'status' => 403,
                                     'message' => 'System Unavialable Right Now'
                                 ])->setStatusCode(403);
                             }
-                        } else {
+                        }
+                        else {
                             return response()->json([
                                 'status' => 403,
                                 'message' => 'Insufficient Account, Fund Your Wallet And Try Again ~ ₦' . number_format($user->bal, 2)
                             ])->setStatusCode(403);
                         }
-                    } else {
+                    }
+                    else {
                         return response()->json([
                             'status' => 403,
                             'message' => 'System is unable to Detect Price Right Now'
                         ])->setStatusCode(403);
                     }
-                } else {
+                }
+                else {
                     return response()->json([
                         'status' => 403,
                         'message' => 'Unable to verify User',
                     ])->setStatusCode(403);
                 }
             }
-        } else {
+        }
+        else {
             return redirect(config('app.error_500'));
         }
     }
@@ -542,15 +572,16 @@ class AppController extends Controller
 
     public function AgentPackage(Request $request)
     {
-        $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
-        $origin = rtrim($request->headers->get('origin'), '/');
-        if (!$origin || in_array($origin, $allowed_urls) || $origin === rtrim($request->getSchemeAndHttpHost(), "/")) {
+        $explode_url = explode(',', config('app.habukhan_app_key'));
+        $origin = $request->headers->get('origin');
+        if (!$origin || in_array($origin, $explode_url)) {
             if (!isset($request->id)) {
                 return response()->json([
                     'message' => 'User ID Required',
                     'status' => 403
                 ])->setStatusCode(403);
-            } else {
+            }
+            else {
                 $check_me = [
                     'username' => $request->id,
                     'status' => 1
@@ -584,68 +615,76 @@ class AppController extends Controller
                                             'status' => 403,
                                             'message' => 'Account Upgraded To AGENT PACKAGE Successfully'
                                         ]);
-                                    } else {
+                                    }
+                                    else {
                                         $this->updateData(['bal' => $credit_user], 'user', ['username' => $user->username, 'id' => $user->id]);
                                         return response()->json([
                                             'status' => 403,
                                             'message' => 'Try Again Later'
                                         ])->setStatusCode(403);
                                     }
-                                } else {
+                                }
+                                else {
                                     $this->updateData(['bal' => $credit_user], 'user', ['username' => $user->username, 'id' => $user->id]);
                                     return response()->json([
                                         'status' => 403,
                                         'message' => 'Try Again Later'
                                     ])->setStatusCode(403);
                                 }
-                            } else {
+                            }
+                            else {
                                 return response()->json([
                                     'status' => 403,
                                     'message' => 'System Unavialable Right Now'
                                 ])->setStatusCode(403);
                             }
-                        } else {
+                        }
+                        else {
                             return response()->json([
                                 'status' => 403,
                                 'message' => 'Insufficient Account, Fund Your Wallet And Try Again ~ ₦' . number_format($user->bal, 2)
                             ])->setStatusCode(403);
                         }
-                    } else {
+                    }
+                    else {
                         return response()->json([
                             'status' => 403,
                             'message' => 'System is unable to Detect Price Right Now'
                         ])->setStatusCode(403);
                     }
-                } else {
+                }
+                else {
                     return response()->json([
                         'status' => 403,
                         'message' => 'Unable to verify User',
                     ])->setStatusCode(403);
                 }
             }
-        } else {
+        }
+        else {
             return redirect(config('app.error_500'));
         }
     }
     public function SystemNetwork(Request $request)
     {
-        $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
-        $origin = rtrim($request->headers->get('origin'), '/');
-        if (!$origin || in_array($origin, $allowed_urls) || $origin === rtrim($request->getSchemeAndHttpHost(), "/")) {
+        $explode_url = explode(',', config('app.habukhan_app_key'));
+        $origin = $request->headers->get('origin');
+        if (!$origin || in_array($origin, $explode_url)) {
             return response()->json([
                 'status' => 'success',
                 'network' => DB::table('network')->select('network', 'network_vtu', 'network_share', 'network_sme', 'network_cg', 'network_g', 'plan_id', 'cash', 'data_card', 'recharge_card')->get()
             ]);
-        } else {
+        }
+        else {
             return redirect(config('app.error_500'));
         }
     }
 
     public function checkNetworkType(Request $type)
     {
-        $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
-        $origin = rtrim($type->headers->get('origin'), '/');
-        if (!$origin || in_array($origin, $allowed_urls) || $origin === rtrim($request->getSchemeAndHttpHost(), "/")) {
+        $explode_url = explode(',', config('app.habukhan_app_key'));
+        $origin = $type->headers->get('origin');
+        if (!$origin || in_array($origin, $explode_url)) {
             if (!empty($type->id)) {
                 if (isset($type->token)) {
                     $network = DB::table('network')->where('plan_id', $type->id)->first();
@@ -654,18 +693,23 @@ class AppController extends Controller
                         $habukhan = $user->first();
                         if ($habukhan->type == 'SMART') {
                             $user_type = strtolower($habukhan->type);
-                        } else if ($habukhan->type == 'AGENT') {
+                        }
+                        else if ($habukhan->type == 'AGENT') {
                             $user_type = strtolower($habukhan->type);
-                        } else if ($habukhan->type == 'AWUF') {
+                        }
+                        else if ($habukhan->type == 'AWUF') {
                             $user_type = strtolower($habukhan->type);
-                        } else if ($habukhan->type == 'API') {
+                        }
+                        else if ($habukhan->type == 'API') {
                             $user_type = strtolower($habukhan->type);
-                        } else {
+                        }
+                        else {
                             $user_type = 'special';
                         }
                         if ($network->network == '9MOBILE') {
                             $real_network = 'mobile';
-                        } else {
+                        }
+                        else {
                             $real_network = $network->network;
                         }
                         $check_for_vtu = strtolower($real_network) . "_vtu_" . $user_type;
@@ -679,35 +723,39 @@ class AppController extends Controller
                             'price_vtu' => $airtime_discount->$check_for_vtu,
                             'price_sns' => $airtime_discount->$check_for_sns
                         ]);
-                    } else {
+                    }
+                    else {
                         return response()->json([
                             'status' => 403,
                             'message' => 'Reload Your Browser'
                         ])->setStatusCode(403);
                     }
-                } else {
+                }
+                else {
                     $network = DB::table('network')->where('plan_id', $type->id)->first();
                     return response()->json([
                         'status' => 'success',
                         'network' => $network,
                     ]);
                 }
-            } else {
+            }
+            else {
                 return response()->json([
                     'status' => 403,
                     'message' => 'network plan id need'
                 ])->setStatusCode(403);
             }
-        } else {
+        }
+        else {
             return redirect(config('app.error_500'));
         }
     }
 
     public function DeleteUser(Request $request)
     {
-        $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
-        $origin = rtrim($request->headers->get('origin'), '/');
-        if (!$origin || in_array($origin, $allowed_urls) || $origin === rtrim($request->getSchemeAndHttpHost(), "/")) {
+        $explode_url = explode(',', config('app.habukhan_app_key'));
+        $origin = $request->headers->get('origin');
+        if (!$origin || in_array($origin, $explode_url)) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN');
@@ -720,7 +768,8 @@ class AppController extends Controller
                             if ($delete_user->count() > 0) {
                                 $delete = DB::table('user')->where('username', $username)->delete();
                                 DB::table('wallet_funding')->where('username', $username)->delete();
-                            } else {
+                            }
+                            else {
                                 $delete = false;
                             }
                         }
@@ -729,40 +778,45 @@ class AppController extends Controller
                                 'status' => 'success',
                                 'message' => 'Account Deleted Successfully'
                             ]);
-                        } else {
+                        }
+                        else {
                             return response()->json([
                                 'status' => 403,
                                 'message' => 'Unable To delete Account'
                             ])->setStatusCode(403);
                         }
-                    } else {
+                    }
+                    else {
                         return response()->json([
                             'status' => 403,
                             'message' => 'User ID  Required'
                         ])->setStatusCode(403);
                     }
-                } else {
+                }
+                else {
                     return response()->json([
                         'status' => 403,
                         'message' => 'Not Authorised'
                     ])->setStatusCode(403);
                 }
-            } else {
+            }
+            else {
                 return redirect(config('app.error_500'));
                 return response()->json([
                     'status' => 403,
                     'message' => 'Unable to Authenticate System'
                 ])->setStatusCode(403);
             }
-        } else {
+        }
+        else {
             return redirect(config('app.error_500'));
         }
     }
     public function singleDelete(Request $request)
     {
-        $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
-        $origin = rtrim($request->headers->get('origin'), '/');
-        if (!$origin || in_array($origin, $allowed_urls) || $origin === rtrim($request->getSchemeAndHttpHost(), "/")) {
+        $explode_url = explode(',', config('app.habukhan_app_key'));
+        $origin = $request->headers->get('origin');
+        if (!$origin || in_array($origin, $explode_url)) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN');
@@ -777,46 +831,52 @@ class AppController extends Controller
                                     'status' => 'success',
                                     'message' => 'Account Deleted Successfully'
                                 ]);
-                            } else {
+                            }
+                            else {
                                 return response()->json([
                                     'status' => 403,
                                     'message' => 'Unable To delete Account'
                                 ])->setStatusCode(403);
                             }
-                        } else {
+                        }
+                        else {
                             return response()->json([
                                 'status' => 403,
                                 'message' => 'User Not Found'
                             ])->setStatusCode(403);
                         }
-                    } else {
+                    }
+                    else {
                         return response()->json([
                             'status' => 403,
                             'message' => 'User ID  Required'
                         ])->setStatusCode(403);
                     }
-                } else {
+                }
+                else {
                     return response()->json([
                         'status' => 403,
                         'message' => 'Not Authorised'
                     ])->setStatusCode(403);
                 }
-            } else {
+            }
+            else {
                 return redirect(config('app.error_500'));
                 return response()->json([
                     'status' => 403,
                     'message' => 'Unable to Authenticate System'
                 ])->setStatusCode(403);
             }
-        } else {
+        }
+        else {
             return redirect(config('app.error_500'));
         }
     }
     public function UserNotif(Request $request)
     {
-        $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
-        $origin = rtrim($request->headers->get('origin'), '/');
-        if (!$origin || in_array($origin, $allowed_urls) || $origin === rtrim($request->getSchemeAndHttpHost(), "/")) {
+        $explode_url = explode(',', config('app.habukhan_app_key'));
+        $origin = $request->headers->get('origin');
+        if (!$origin || in_array($origin, $explode_url)) {
             if (!empty($request->id)) {
 
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)]);
@@ -832,10 +892,12 @@ class AppController extends Controller
                                 $users = $select_user->first();
                                 if ($users->profile_image !== null) {
                                     $profile_image[] = ['username' => $habukhan->username, 'id' => $habukhan->id, 'message' => $habukhan->message, 'date' => $habukhan->date, 'profile_image' => $users->profile_image, 'status' => $habukhan->habukhan];
-                                } else {
+                                }
+                                else {
                                     $profile_image[] = ['username' => $habukhan->username, 'id' => $habukhan->id, 'message' => $habukhan->message, 'date' => $habukhan->date, 'profile_image' => $users->username, 'status' => $habukhan->habukhan];
                                 }
-                            } else {
+                            }
+                            else {
                                 $profile_image[] = ['username' => $habukhan->username, 'id' => $habukhan->id, 'message' => $habukhan->message, 'date' => $habukhan->date, 'profile_image' => $habukhan->username, 'status' => $habukhan->habukhan];
                             }
                         }
@@ -844,27 +906,30 @@ class AppController extends Controller
                             'notif' => $profile_image
                         ]);
                     }
-                } else {
+                }
+                else {
                     return response()->json([
                         'status' => 403,
                         'message' => 'User Not Authorised'
                     ])->setStatusCode(403);
                 }
-            } else {
+            }
+            else {
                 return response()->json([
                     'status' => 403,
                     'message' => 'Not Authorised'
                 ])->setStatusCode(403);
             }
-        } else {
+        }
+        else {
             return redirect(config('app.error_500'));
         }
     }
     public function ClearNotifUser(Request $request)
     {
-        $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
-        $origin = rtrim($request->headers->get('origin'), '/');
-        if (!$origin || in_array($origin, $allowed_urls) || $origin === rtrim($request->getSchemeAndHttpHost(), "/")) {
+        $explode_url = explode(',', config('app.habukhan_app_key'));
+        $origin = $request->headers->get('origin');
+        if (!$origin || in_array($origin, $explode_url)) {
             if (!empty($request->id)) {
 
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)]);
@@ -873,61 +938,68 @@ class AppController extends Controller
                     $habukhan_username = $habukhan->username;
                     // user request
                     DB::table('notif')->where('username', $habukhan_username)->delete();
-                } else {
+                }
+                else {
                     return response()->json([
                         'status' => 403,
                         'message' => 'User Not Authorised'
                     ])->setStatusCode(403);
                 }
-            } else {
+            }
+            else {
                 return response()->json([
                     'status' => 403,
                     'message' => 'Not Authorised'
                 ])->setStatusCode(403);
             }
-        } else {
+        }
+        else {
             return redirect(config('app.error_500'));
         }
     }
 
     public function CableName(Request $request)
     {
-        $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
-        $origin = rtrim($request->headers->get('origin'), '/');
-        if (!$origin || in_array($origin, $allowed_urls) || $origin === rtrim($request->getSchemeAndHttpHost(), "/")) {
+        $explode_url = explode(',', config('app.habukhan_app_key'));
+        $origin = $request->headers->get('origin');
+        if (!$origin || in_array($origin, $explode_url)) {
             return response()->json([
                 'status' => 'success',
                 'cable' => DB::table('cable_result_lock')->first()
             ]);
-        } else {
+        }
+        else {
             return redirect(config('app.error_500'));
         }
     }
     public function BillCal(Request $request)
     {
-        $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
-        $origin = rtrim($request->headers->get('origin'), '/');
-        if (!$origin || in_array($origin, $allowed_urls) || $origin === rtrim($request->getSchemeAndHttpHost(), "/")) {
+        $explode_url = explode(',', config('app.habukhan_app_key'));
+        $origin = $request->headers->get('origin');
+        if (!$origin || in_array($origin, $explode_url)) {
             if ((isset($request->id)) && (!empty($request->id))) {
                 if (is_numeric($request->id)) {
                     $bill_d = DB::table('bill_charge')->first();
                     if ($bill_d->direct == 1) {
                         $charges = $bill_d->bill;
-                    } else {
+                    }
+                    else {
                         $charges = ($request->id / 100) * $bill_d->bill;
                     }
                     return response()->json([
                         'status' => 'suucess',
                         'charges' => $charges
                     ]);
-                } else {
+                }
+                else {
                     return response()->json([
                         'status' => 403,
                         'message' => 'invalid amount'
                     ])->setStatusCode(403);
                 }
             }
-        } else {
+        }
+        else {
             return redirect(config('app.error_500'));
         }
     }
@@ -946,15 +1018,15 @@ class AppController extends Controller
     }
     public function AirtimeCash(Request $request)
     {
-        $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
-        $origin = rtrim($request->headers->get('origin'), '/');
-        if (!$origin || in_array($origin, $allowed_urls) || $origin === rtrim($request->getSchemeAndHttpHost(), "/")) {
+        $explode_url = explode(',', config('app.habukhan_app_key'));
+        if (!$request->headers->get('origin') || in_array($request->headers->get('origin'), $explode_url)) {
             if (!empty($request->amount)) {
                 if (!empty($request->network)) {
 
                     if ($request->network == '9MOBILE') {
                         $network_name = 'mobile';
-                    } else {
+                    }
+                    else {
                         $network_name = strtolower($request->network);
                     }
                     $system_admin = DB::table('cash_discount')->first();
@@ -964,51 +1036,56 @@ class AppController extends Controller
                         'amount' => $credit,
                         'status' => 'success'
                     ]);
-                } else {
+                }
+                else {
                     return response()->json([
                         'message' => 'Network Required'
                     ])->setStatusCode(403);
                 }
-            } else {
+            }
+            else {
                 return response()->json([
                     'status' => 403,
                     'message' => 'Amount Required'
                 ])->setStatusCode(403);
             }
-        } else {
+        }
+        else {
             return redirect(config('app.error_500'));
         }
     }
     public function BulksmsCal(Request $request)
     {
-        $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
-        $origin = rtrim($request->headers->get('origin'), '/');
-        if (!$origin || in_array($origin, $allowed_urls) || $origin === rtrim($request->getSchemeAndHttpHost(), "/")) {
+        $explode_url = explode(',', config('app.habukhan_app_key'));
+        $origin = $request->headers->get('origin');
+        if (!$origin || in_array($origin, $explode_url)) {
             return response()->json([
                 'amount' => $this->core()->bulk_sms
             ]);
-        } else {
+        }
+        else {
             return redirect(config('app.error_500'));
         }
     }
     public function ResultPrice(Request $request)
     {
-        $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
-        $origin = rtrim($request->headers->get('origin'), '/');
-        if (!$origin || in_array($origin, $allowed_urls) || $origin === rtrim($request->getSchemeAndHttpHost(), "/")) {
+        $explode_url = explode(',', config('app.habukhan_app_key'));
+        $origin = $request->headers->get('origin');
+        if (!$origin || in_array($origin, $explode_url)) {
             return response()->json([
                 'price' => DB::table('result_charge')->first()
             ]);
-        } else {
+        }
+        else {
             return redirect(config('app.error_500'));
         }
     }
 
     public function getAppInfo(Request $request)
     {
-        $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
-        $origin = rtrim($request->headers->get('origin'), '/');
-        if (!$origin || in_array($origin, $allowed_urls) || $origin === rtrim($request->getSchemeAndHttpHost(), "/")) {
+        $explode_url = explode(',', config('app.habukhan_app_key'));
+        $origin = $request->headers->get('origin');
+        if (!$origin || in_array($origin, $explode_url)) {
             $general = $this->general();
             $faqs = DB::table('faqs')->where('status', 1)->get();
 
@@ -1031,7 +1108,8 @@ class AppController extends Controller
                 ],
                 'faqs' => $faqs
             ]);
-        } else {
+        }
+        else {
             return response()->json([
                 'status' => 403,
                 'message' => 'Unable to Authenticate System'
@@ -1089,7 +1167,8 @@ class AppController extends Controller
 
             return response()->json(['status' => 'error', 'message' => 'Failed to send email. Please try again.'], 500);
 
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
             \Log::error('Email Receipt Error: ' . $e->getMessage());
             return response()->json(['status' => 'error', 'message' => 'An internal error occurred.'], 500);
         }

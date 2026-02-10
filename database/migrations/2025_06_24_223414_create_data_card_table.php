@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('data_card', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->string('username', 20);
+            $table->string('username', 12);
             $table->string('transid', 50)->unique();
             $table->string('network', 20);
             $table->string('plan_name', 100);

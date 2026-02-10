@@ -36,7 +36,7 @@ return new class extends Migration
                         'username' => $user->username,
                         'bank' => 'MONIEPOINT',
                         'account_number' => $user->sterlen,
-                        'bank_name' => 'AMTPAY - ' . strtoupper($user->username),
+                        'bank_name' => 'KOBOPOINT - ' . strtoupper($user->username),
                         'bank_code' => '50515',
                         'date' => Carbon\Carbon::now("Africa/Lagos")->toDateTimeString(),
                     ]);

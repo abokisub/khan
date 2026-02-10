@@ -4,7 +4,8 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     /**
      * Run the migrations.
      *
@@ -12,7 +13,7 @@ return new class extends Migration {
      */
     public function up()
     {
-        Schema::create('habukhan_key', function (Blueprint $table) {
+        Schema::create('adex_key', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('account_number', 20);
             $table->string('account_name', 100);
@@ -20,13 +21,6 @@ return new class extends Migration {
             $table->decimal('min', 10, 2)->default(0.00);
             $table->decimal('max', 10, 2)->default(0.00);
             $table->integer('default_limit')->default(0);
-            $table->string('mon_app_key', 255)->nullable();
-            $table->string('mon_sk_key', 255)->nullable();
-            $table->string('mon_con_num', 255)->nullable();
-            $table->string('mon_bvn', 255)->nullable();
-            $table->string('psk', 255)->nullable();
-            $table->string('psk_bvn', 255)->nullable();
-            $table->boolean('plive')->default(false);
         });
     }
 
@@ -37,6 +31,6 @@ return new class extends Migration {
      */
     public function down()
     {
-        Schema::dropIfExists('habukhan_key');
+        Schema::dropIfExists('adex_key');
     }
 };

@@ -15,8 +15,8 @@ class FaqSeeder extends Seeder
     {
         \DB::table('faqs')->insert([
             [
-                'question' => 'What is AmtPay?',
-                'answer' => 'AmtPay is a secure digital wallet and payment platform that allows you to manage your finances, pay bills, and send money with ease.',
+                'question' => 'What is Kobopoint?',
+                'answer' => 'Kobopoint is a secure digital wallet and payment platform that allows you to manage your finances, pay bills, and send money with ease.',
                 'category' => 'General',
                 'status' => 1,
                 'created_at' => now(),

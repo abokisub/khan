@@ -15,9 +15,8 @@ class NotificationHistoryController extends Controller
      */
     public function getNotifications(Request $request)
     {
-        $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
-        $origin = rtrim($request->headers->get('origin'), '/');
-        if (!$origin || in_array($origin, $allowed_urls) || $origin === rtrim($request->getSchemeAndHttpHost(), "/")) {
+        $explode_url = explode(',', config('app.habukhan_app_key'));
+        if (!$request->headers->get('origin') || in_array($request->headers->get('origin'), $explode_url)) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN');
@@ -32,19 +31,22 @@ class NotificationHistoryController extends Controller
                         'status' => 'success',
                         'data' => $broadcasts
                     ]);
-                } else {
+                }
+                else {
                     return response()->json([
                         'status' => 403,
                         'message' => 'User Not Authorised'
                     ])->setStatusCode(403);
                 }
-            } else {
+            }
+            else {
                 return response()->json([
                     'status' => 403,
                     'message' => 'Not Authorised'
                 ])->setStatusCode(403);
             }
-        } else {
+        }
+        else {
             return response()->json([
                 'status' => 403,
                 'message' => 'Unable to Authenticate System'
@@ -58,9 +60,8 @@ class NotificationHistoryController extends Controller
      */
     public function resendNotification(Request $request, $notificationId)
     {
-        $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
-        $origin = rtrim($request->headers->get('origin'), '/');
-        if (!$origin || in_array($origin, $allowed_urls) || $origin === rtrim($request->getSchemeAndHttpHost(), "/")) {
+        $explode_url = explode(',', config('app.habukhan_app_key'));
+        if (!$request->headers->get('origin') || in_array($request->headers->get('origin'), $explode_url)) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN');
@@ -81,9 +82,11 @@ class NotificationHistoryController extends Controller
                     // Get target users
                     if ($broadcast->target_type == 'ALL') {
                         $all_user = DB::table('user')->get();
-                    } else if ($broadcast->target_type == 'CUSTOM') {
+                    }
+                    else if ($broadcast->target_type == 'CUSTOM') {
                         $all_user = DB::table('user')->where('username', $broadcast->target_username)->get();
-                    } else {
+                    }
+                    else {
                         $all_user = DB::table('user')->where('type', $broadcast->target_type)->get();
                     }
 
@@ -118,15 +121,16 @@ class NotificationHistoryController extends Controller
                                 $tokens,
                                 config('app.name'), // Use app name as title for broadcasts
                                 $broadcast->message,
-                                [
-                                    'type' => 'broadcast',
-                                    'broadcast_id' => $newBroadcastId,
-                                    'channel_id' => 'admin_broadcast_channel'
-                                ],
+                            [
+                                'type' => 'broadcast',
+                                'broadcast_id' => $newBroadcastId,
+                                'channel_id' => 'admin_broadcast_channel'
+                            ],
                                 $absoluteImageUrl,
                                 true // is_data_only
                             );
-                        } catch (\Exception $e) {
+                        }
+                        catch (\Exception $e) {
                             \Illuminate\Support\Facades\Log::warning('Resend Multicast Firebase failed: ' . $e->getMessage());
                         }
                     }
@@ -151,19 +155,22 @@ class NotificationHistoryController extends Controller
                             'sent_count' => $all_user->count()
                         ]
                     ]);
-                } else {
+                }
+                else {
                     return response()->json([
                         'status' => 403,
                         'message' => 'User Not Authorised'
                     ])->setStatusCode(403);
                 }
-            } else {
+            }
+            else {
                 return response()->json([
                     'status' => 403,
                     'message' => 'Not Authorised'
                 ])->setStatusCode(403);
             }
-        } else {
+        }
+        else {
             return response()->json([
                 'status' => 403,
                 'message' => 'Unable to Authenticate System'
@@ -177,9 +184,8 @@ class NotificationHistoryController extends Controller
      */
     public function updateNotification(Request $request, $notificationId)
     {
-        $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
-        $origin = rtrim($request->headers->get('origin'), '/');
-        if (!$origin || in_array($origin, $allowed_urls) || $origin === rtrim($request->getSchemeAndHttpHost(), "/")) {
+        $explode_url = explode(',', config('app.habukhan_app_key'));
+        if (!$request->headers->get('origin') || in_array($request->headers->get('origin'), $explode_url)) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN');
@@ -226,19 +232,22 @@ class NotificationHistoryController extends Controller
                         'status' => 'success',
                         'message' => 'Notification updated successfully'
                     ]);
-                } else {
+                }
+                else {
                     return response()->json([
                         'status' => 403,
                         'message' => 'User Not Authorised'
                     ])->setStatusCode(403);
                 }
-            } else {
+            }
+            else {
                 return response()->json([
                     'status' => 403,
                     'message' => 'Not Authorised'
                 ])->setStatusCode(403);
             }
-        } else {
+        }
+        else {
             return response()->json([
                 'status' => 403,
                 'message' => 'Unable to Authenticate System'
@@ -252,9 +261,8 @@ class NotificationHistoryController extends Controller
      */
     public function deleteNotification(Request $request, $notificationId)
     {
-        $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
-        $origin = rtrim($request->headers->get('origin'), '/');
-        if (!$origin || in_array($origin, $allowed_urls) || $origin === rtrim($request->getSchemeAndHttpHost(), "/")) {
+        $explode_url = explode(',', config('app.habukhan_app_key'));
+        if (!$request->headers->get('origin') || in_array($request->headers->get('origin'), $explode_url)) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN');
@@ -286,19 +294,22 @@ class NotificationHistoryController extends Controller
                         'status' => 'success',
                         'message' => 'Notification deleted successfully'
                     ]);
-                } else {
+                }
+                else {
                     return response()->json([
                         'status' => 403,
                         'message' => 'User Not Authorised'
                     ])->setStatusCode(403);
                 }
-            } else {
+            }
+            else {
                 return response()->json([
                     'status' => 403,
                     'message' => 'Not Authorised'
                 ])->setStatusCode(403);
             }
-        } else {
+        }
+        else {
             return response()->json([
                 'status' => 403,
                 'message' => 'Unable to Authenticate System'

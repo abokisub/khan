@@ -17,9 +17,9 @@ class AuthController extends Controller
     {
         set_time_limit(300); // Increased time limit
         ignore_user_abort(true); // Continue processing even if user disconnects
-        $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
-        $origin = rtrim($request->headers->get('origin'), '/');
-        if (!$origin || in_array($origin, $allowed_urls) || $origin === rtrim($request->getSchemeAndHttpHost(), '/')) {
+        $explode_url = explode(',', config('app.habukhan_app_key'));
+        $origin = $request->headers->get('origin');
+        if (!$origin || in_array($origin, $explode_url)) {
             $validator = validator::make($request->all(), [
                 'name' => 'required|max:199|min:3',
                 'email' => 'required|unique:user,email|max:255|email',
@@ -271,9 +271,9 @@ class AuthController extends Controller
     }
     public function account(Request $request)
     {
-        $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
-        $origin = rtrim($request->headers->get('origin'), '/');
-        if (!$origin || in_array($origin, $allowed_urls) || $origin === rtrim($request->getSchemeAndHttpHost(), "/")) {
+        $explode_url = explode(',', config('app.habukhan_app_key'));
+        $origin = $request->headers->get('origin');
+        if (!$origin || in_array($origin, $explode_url)) {
             $user_token = $request->id;
             $real_token = $this->verifytoken($user_token);
             if (!is_null($real_token)) {
@@ -464,9 +464,8 @@ class AuthController extends Controller
     }
     public function verify(Request $request)
     {
-        $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
-        $origin = rtrim($request->headers->get('origin'), '/');
-        if (!$origin || in_array($origin, $allowed_urls) || $origin === rtrim($request->getSchemeAndHttpHost(), "/")) {
+        $explode_url = explode(',', config('app.habukhan_app_key'));
+        if (!$request->headers->get('origin') || in_array($request->headers->get('origin'), $explode_url)) {
             $habukhan_check = DB::table('user')->where('email', $request->email);
             if ($habukhan_check->count() == 1) {
                 $user = $habukhan_check->get()[0];
@@ -624,9 +623,9 @@ class AuthController extends Controller
     }
     public function login(Request $request)
     {
-        $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
-        $origin = rtrim($request->headers->get('origin'), '/');
-        if (!$origin || in_array($origin, $allowed_urls) || $origin === rtrim($request->getSchemeAndHttpHost(), '/')) {
+        $explode_url = explode(',', config('app.habukhan_app_key'));
+        $origin = $request->headers->get('origin');
+        if (!$origin || in_array($origin, $explode_url)) {
             try {
                 //our login function over here
                 \Log::info('API Login Hit: ' . json_encode($request->except('password')));
@@ -784,7 +783,7 @@ class AuthController extends Controller
                                     DB::table('user')->where(['id' => $user->id])->update(['status' => 1]);
                                     return response()->json([
                                         'status' => 'success',
-                                        'message' => 'Login successfully (Auto-Verified)',
+                                        'message' => 'Login successfully',
                                         'user' => $user_details,
                                         'token' => $this->generatetoken($user->id)
                                     ]);
@@ -794,7 +793,7 @@ class AuthController extends Controller
                                     DB::table('user')->where(['id' => $user->id])->update(['status' => 1]);
                                     return response()->json([
                                         'status' => 'success',
-                                        'message' => 'Login successfully (Web Auto-Verify)',
+                                        'message' => 'Login successfully',
                                         'user' => $user_details,
                                         'token' => $this->generatetoken($user->id)
                                     ]);
@@ -844,7 +843,7 @@ class AuthController extends Controller
                     } else {
                         return response()->json([
                             'status' => 403,
-                            'message' => 'Invalid Username and Password'
+                            'message' => 'Invalid Username and Password.'
                         ])->setStatusCode(403);
                     }
                 }
@@ -869,9 +868,8 @@ class AuthController extends Controller
 
     public function resendOtp(Request $request)
     {
-        $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
-        $origin = rtrim($request->headers->get('origin'), '/');
-        if (!$origin || in_array($origin, $allowed_urls) || $origin === rtrim($request->getSchemeAndHttpHost(), "/")) {
+        $explode_url = explode(',', config('app.habukhan_app_key'));
+        if (!$request->headers->get('origin') || in_array($request->headers->get('origin'), $explode_url)) {
             if (isset($request->id)) {
                 $sel_user = DB::table('user')->where('email', $request->id);
                 if ($sel_user->count() == 1) {

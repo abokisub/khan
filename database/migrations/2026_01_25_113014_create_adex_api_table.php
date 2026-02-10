@@ -11,22 +11,22 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::create('habukhan_api', function (Blueprint $table) {
+        Schema::create('adex_api', function (Blueprint $table) {
             $table->id();
-            $table->string('habukhan1_username')->nullable();
-            $table->string('habukhan1_password')->nullable();
-            $table->string('habukhan2_username')->nullable();
-            $table->string('habukhan2_password')->nullable();
-            $table->string('habukhan3_username')->nullable();
-            $table->string('habukhan3_password')->nullable();
-            $table->string('habukhan4_username')->nullable();
-            $table->string('habukhan4_password')->nullable();
-            $table->string('habukhan5_username')->nullable();
-            $table->string('habukhan5_password')->nullable();
+            $table->string('adex1_username')->nullable();
+            $table->string('adex1_password')->nullable();
+            $table->string('adex2_username')->nullable();
+            $table->string('adex2_password')->nullable();
+            $table->string('adex3_username')->nullable();
+            $table->string('adex3_password')->nullable();
+            $table->string('adex4_username')->nullable();
+            $table->string('adex4_password')->nullable();
+            $table->string('adex5_username')->nullable();
+            $table->string('adex5_password')->nullable();
         });
 
         // Initial seed
-        DB::table('habukhan_api')->insert(['id' => 1]);
+        DB::table('adex_api')->insert(['id' => 1]);
     }
 
     /**
@@ -34,6 +34,6 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('habukhan_api');
+        Schema::dropIfExists('adex_api');
     }
 };

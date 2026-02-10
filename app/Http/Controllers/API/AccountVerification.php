@@ -16,11 +16,11 @@ class AccountVerification extends Controller
      */
     public function verifyBankAccount(Request $request)
     {
-        $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
-        $origin = rtrim($request->headers->get('origin'), '/');
+        $explode_url = explode(',', config('app.habukhan_app_key'));
+        $origin = $request->header('Origin');
         $authorization = $request->header('Authorization');
 
-        if (!$origin || in_array($origin, $allowed_urls) || $origin === rtrim($request->getSchemeAndHttpHost(), '/') || config('app.habukhan_device_key') === $authorization) {
+        if (!$origin || in_array($origin, $explode_url) || $origin === $request->getSchemeAndHttpHost() || config('app.habukhan_device_key') === $authorization) {
             if (!empty($request->id)) {
                 // Verify user authentication
                 $auth_user = DB::table('user')->where('status', 1)->where(function ($query) use ($request) {

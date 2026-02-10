@@ -4,7 +4,8 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     /**
      * Run the migrations.
      *
@@ -14,15 +15,11 @@ return new class extends Migration {
     {
         Schema::create('message', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->string('username', 20);
+            $table->string('username', 12);
             $table->string('transid', 50)->unique();
             $table->text('message');
-            $table->decimal('amount', 15, 2)->default(0.00);
-            $table->decimal('oldbal', 15, 2)->default(0.00);
-            $table->decimal('newbal', 15, 2)->default(0.00);
-            $table->string('role')->nullable();
             $table->enum('plan_status', ['0', '1', '2'])->default(0);
-            $table->timestamp('habukhan_date');
+            $table->timestamp('date');
         });
     }
 

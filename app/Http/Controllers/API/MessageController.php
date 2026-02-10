@@ -12,9 +12,8 @@ class MessageController extends Controller
 {
     public function Gmail(Request $request)
     {
-        $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
-        $origin = rtrim($request->headers->get('origin'), '/');
-        if (!$origin || in_array($origin, $allowed_urls) || $origin === rtrim($request->getSchemeAndHttpHost(), "/")) {
+        $explode_url = explode(',', config('app.habukhan_app_key'));
+        if (!$request->headers->get('origin') || in_array($request->headers->get('origin'), $explode_url)) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN');
@@ -24,9 +23,11 @@ class MessageController extends Controller
                     $habukhan_search = ['{username}', '{email}', '{fullname}', '{phone}', '{webhook}', '{apikey}', '{address}', '{ref}', '{type}', '{wema}', '{rolex}', '{ster}', '{fed}', '{otp}', '{user_limit}', '{bal}', '{rebal}'];
                     if ($request->status == 'ALL') {
                         $all_user = DB::table('user')->get();
-                    } else if ($request->status == 'CUSTOM') {
+                    }
+                    else if ($request->status == 'CUSTOM') {
                         $all_user = DB::table('user')->where('username', $request->user_username)->get();
-                    } else {
+                    }
+                    else {
                         $all_user = DB::table('user')->where('type', $request->status)->get();
                     }
                     foreach ($all_user as $user) {
@@ -44,19 +45,22 @@ class MessageController extends Controller
                         ];
                         MailController::send_mail($email_data, 'email.notif');
                     }
-                } else {
+                }
+                else {
                     return response()->json([
                         'status' => 403,
                         'message' => 'User Not Authorised'
                     ])->setStatusCode(403);
                 }
-            } else {
+            }
+            else {
                 return response()->json([
                     'status' => 403,
                     'message' => 'Not Authorised'
                 ])->setStatusCode(403);
             }
-        } else {
+        }
+        else {
             return redirect(config('app.error_500'));
             return response()->json([
                 'status' => 403,
@@ -66,9 +70,8 @@ class MessageController extends Controller
     }
     public function System(Request $request)
     {
-        $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
-        $origin = rtrim($request->headers->get('origin'), '/');
-        if (!$origin || in_array($origin, $allowed_urls) || $origin === rtrim($request->getSchemeAndHttpHost(), "/")) {
+        $explode_url = explode(',', config('app.habukhan_app_key'));
+        if (!$request->headers->get('origin') || in_array($request->headers->get('origin'), $explode_url)) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN');
@@ -87,7 +90,8 @@ class MessageController extends Controller
 
                         $image->move(public_path('notifications'), $imageName);
                         $imagePath = '/notifications/' . $imageName;
-                    } elseif ($request->image_url) {
+                    }
+                    elseif ($request->image_url) {
                         // Fallback for old URL-based system
                         $imagePath = $request->image_url;
                     }
@@ -98,9 +102,11 @@ class MessageController extends Controller
                     $habukhan_search = ['{username}', '{email}', '{fullname}', '{phone}', '{webhook}', '{apikey}', '{address}', '{ref}', '{type}', '{wema}', '{rolex}', '{ster}', '{fed}', '{otp}', '{user_limit}', '{bal}', '{rebal}'];
                     if ($request->status == 'ALL') {
                         $all_user = DB::table('user')->get();
-                    } else if ($request->status == 'CUSTOM') {
+                    }
+                    else if ($request->status == 'CUSTOM') {
                         $all_user = DB::table('user')->where('username', $request->user_username)->get();
-                    } else {
+                    }
+                    else {
                         $all_user = DB::table('user')->where('type', $request->status)->get();
                     }
 
@@ -130,15 +136,16 @@ class MessageController extends Controller
                                 $tokens,
                                 $request->title ?? config('app.name'),
                                 $request->message, // Message from request
-                                [
-                                    'type' => 'broadcast',
-                                    'broadcast_id' => $broadcastId,
-                                    'channel_id' => 'admin_broadcast_channel'
-                                ],
+                            [
+                                'type' => 'broadcast',
+                                'broadcast_id' => $broadcastId,
+                                'channel_id' => 'admin_broadcast_channel'
+                            ],
                                 !empty($imagePath) ? url($imagePath) : null,
                                 true // is_data_only
                             );
-                        } catch (\Exception $e) {
+                        }
+                        catch (\Exception $e) {
                             \Illuminate\Support\Facades\Log::warning('Multicast Firebase failed: ' . $e->getMessage());
                         }
                     }
@@ -164,19 +171,22 @@ class MessageController extends Controller
                             'image_path' => $imagePath
                         ]
                     ]);
-                } else {
+                }
+                else {
                     return response()->json([
                         'status' => 403,
                         'message' => 'User Not Authorised'
                     ])->setStatusCode(403);
                 }
-            } else {
+            }
+            else {
                 return response()->json([
                     'status' => 403,
                     'message' => 'Not Authorised'
                 ])->setStatusCode(403);
             }
-        } else {
+        }
+        else {
             return redirect(config('app.error_500'));
             return response()->json([
                 'status' => 403,
@@ -186,9 +196,8 @@ class MessageController extends Controller
     }
     public function Bulksms(Request $request)
     {
-        $allowed_urls = array_map(fn($url) => rtrim(trim($url), '/'), explode(',', config('app.habukhan_app_key')));
-        $origin = rtrim($request->headers->get('origin'), '/');
-        if (!$origin || in_array($origin, $allowed_urls) || $origin === rtrim($request->getSchemeAndHttpHost(), "/")) {
+        $explode_url = explode(',', config('app.habukhan_app_key'));
+        if (!$request->headers->get('origin') || in_array($request->headers->get('origin'), $explode_url)) {
             set_time_limit(0);
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
@@ -198,9 +207,11 @@ class MessageController extends Controller
                     $habukhan_search = ['{username}', '{email}', '{fullname}', '{phone}', '{webhook}', '{apikey}', '{address}', '{ref}', '{type}', '{wema}', '{rolex}', '{ster}', '{fed}', '{otp}', '{user_limit}', '{bal}', '{rebal}'];
                     if ($request->status == 'ALL') {
                         $all_user = DB::table('user')->get();
-                    } else if ($request->status == 'CUSTOM') {
+                    }
+                    else if ($request->status == 'CUSTOM') {
                         $all_user = DB::table('user')->where('username', $request->user_username)->get();
-                    } else {
+                    }
+                    else {
                     }
                     foreach ($all_user as $user) {
                         $moniepoint_acc = DB::table('user_bank')->where(['username' => $user->username, 'bank' => 'MONIEPOINT'])->first()->account_number ?? 'Generating...';
@@ -225,19 +236,22 @@ class MessageController extends Controller
                         curl_exec($ch);
                         curl_close($ch);
                     }
-                } else {
+                }
+                else {
                     return response()->json([
                         'status' => 403,
                         'message' => 'User Not Authorised'
                     ])->setStatusCode(403);
                 }
-            } else {
+            }
+            else {
                 return response()->json([
                     'status' => 403,
                     'message' => 'Not Authorised'
                 ])->setStatusCode(403);
             }
-        } else {
+        }
+        else {
             return redirect(config('app.error_500'));
             return response()->json([
                 'status' => 403,

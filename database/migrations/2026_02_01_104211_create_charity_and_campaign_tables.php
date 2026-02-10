@@ -15,12 +15,9 @@ return new class extends Migration {
         if (!Schema::hasTable('charities')) {
             Schema::create('charities', function (Blueprint $table) {
                 $table->id();
-                $table->unsignedBigInteger('user_id')->nullable();
                 $table->string('name');
                 $table->string('username')->unique();
                 $table->string('category');
-                $table->text('description')->nullable();
-                $table->string('logo')->nullable();
                 $table->string('verification_status')->default('unverified');
                 $table->string('bank_account')->nullable();
                 $table->string('bank_name')->nullable();
@@ -28,8 +25,6 @@ return new class extends Migration {
                 $table->decimal('available_balance', 15, 2)->default(0.00);
                 $table->json('documents')->nullable();
                 $table->timestamps();
-
-                $table->foreign('user_id')->references('id')->on('user')->onDelete('set null');
             });
         }
 
@@ -54,7 +49,7 @@ return new class extends Migration {
         if (!Schema::hasTable('donations')) {
             Schema::create('donations', function (Blueprint $table) {
                 $table->id();
-                $table->unsignedBigInteger('user_id');
+                $table->integer('user_id');
                 $table->unsignedBigInteger('campaign_id');
                 $table->unsignedBigInteger('charity_id');
                 $table->decimal('amount', 15, 2);

@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('bank_transfer', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->string('username', 20);
+            $table->string('username', 12);
             $table->decimal('amount', 10, 2);
             $table->string('account_number', 20);
             $table->string('account_name', 100);

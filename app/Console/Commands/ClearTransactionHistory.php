@@ -13,7 +13,7 @@ class ClearTransactionHistory extends Command
      *
      * @var string
      */
-    protected $signature = 'amtpay:clear-history';
+    protected $signature = 'kobopoint:clear-history';
 
     /**
      * The console command description.
@@ -49,27 +49,13 @@ class ClearTransactionHistory extends Command
         DB::statement('SET FOREIGN_KEY_CHECKS=0;');
 
         $tables = [
-            'airtime',
-            'data',
-            'cable',
-            'bill',
-            'bulksms',
-            'exam',
-            'result_charge',
+            'airtime', 'data', 'cable', 'bill', 'bulksms', 'exam', 'result_charge',
             'message',
-            'transfers',
-            'bank_transfer',
-            'wallet_funding',
-            'deposit',
-            'virtual_cards',
-            'card_transactions',
-            'notif',
-            'notifications',
-            'notification_broadcasts',
-            'support_tickets',
-            'support_messages',
-            'beneficiaries',
-            'service_beneficiaries',
+            'transfers', 'bank_transfer', 'wallet_funding', 'deposit',
+            'virtual_cards', 'card_transactions',
+            'notif', 'notifications', 'notification_broadcasts',
+            'support_tickets', 'support_messages',
+            'beneficiaries', 'service_beneficiaries',
             'request'
         ];
 
@@ -77,7 +63,8 @@ class ClearTransactionHistory extends Command
             if (Schema::hasTable($table)) {
                 $this->info("Truncating table: $table");
                 DB::table($table)->truncate();
-            } else {
+            }
+            else {
                 $this->warn("Table not found: $table (Skipping)");
             }
         }
