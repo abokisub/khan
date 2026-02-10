@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateNotifTable extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      *
@@ -19,7 +18,11 @@ class CreateNotifTable extends Migration
             $table->text('message');
             $table->string('title', 100);
             $table->boolean('status')->default(false);
+            $table->string('image_url')->nullable();
+            $table->string('broadcast_id')->nullable();
             $table->timestamp('date');
+
+            $table->index('broadcast_id');
         });
     }
 
@@ -32,4 +35,4 @@ class CreateNotifTable extends Migration
     {
         Schema::dropIfExists('notif');
     }
-}
+};

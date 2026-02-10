@@ -5,7 +5,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
 
-class CreateSmartTransferTables extends Migration
+return new class extends Migration
 {
     /**
      * Run the migrations.
@@ -111,4 +111,4 @@ class CreateSmartTransferTables extends Migration
             $table->dropColumn(['transfer_lock_all', 'transfer_charge_type', 'transfer_charge_value', 'transfer_charge_cap']);
         });
     }
-}
+};

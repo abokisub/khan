@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateServiceBeneficiariesTable extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      *
@@ -26,7 +25,7 @@ class CreateServiceBeneficiariesTable extends Migration
             $table->timestamp('last_used_at')->nullable();
             $table->timestamps();
 
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('user_id')->references('id')->on('user')->onDelete('cascade');
             $table->unique(['user_id', 'service_type', 'identifier'], 'user_service_identifier_unique');
             $table->index(['user_id', 'service_type']);
         });
@@ -41,4 +40,4 @@ class CreateServiceBeneficiariesTable extends Migration
     {
         Schema::dropIfExists('service_beneficiaries');
     }
-}
+};

@@ -32,12 +32,11 @@ class AdminSeeder extends Seeder
                 'bal' => 1000000, // Starting balance for testing
                 'refbal' => 0,
                 'kyc' => 1, // Verified
-                'verified' => 1,
                 'date' => Carbon::now(),
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
                 // Add other necessary default fields based on schema if needed
-                'api_key' => bin2hex(random_bytes(16)),
+                'apikey' => bin2hex(random_bytes(16)),
             ]);
             $this->command->info('Admin account @Habukhan2025 created successfully.');
         } else {

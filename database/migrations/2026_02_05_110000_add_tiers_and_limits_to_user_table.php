@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddTiersAndLimitsToUserTable extends Migration
+return new class extends Migration
 {
     /**
      * Run the migrations.
@@ -58,4 +58,4 @@ class AddTiersAndLimitsToUserTable extends Migration
             $table->dropColumn(['kyc_tier', 'single_limit', 'daily_limit', 'daily_used', 'daily_used_date']);
         });
     }
-}
+};

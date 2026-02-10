@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class MakeCampaignDatesNullable extends Migration
+return new class extends Migration
 {
     /**
      * Run the migrations.
@@ -27,4 +27,4 @@ class MakeCampaignDatesNullable extends Migration
         DB::statement('ALTER TABLE campaigns MODIFY COLUMN start_date DATETIME NOT NULL');
         DB::statement('ALTER TABLE campaigns MODIFY COLUMN end_date DATETIME NOT NULL');
     }
-}
+};
