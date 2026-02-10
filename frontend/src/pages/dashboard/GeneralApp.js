@@ -46,9 +46,9 @@ export default function GeneralApp() {
   const isDesktop = useResponsive('up', 'lg');
 
   useEffect(() => {
-    if (setting?.setting?.notif_show === 1) {
+    if (marqueeMessage) {
       // Check if user has already seen the welcome message
-      const hasSeenWelcome = localStorage.getItem('hasSeenWelcome');
+      const hasSeenWelcome = localStorage.getItem('hasSeenWelcome_v2');
 
       if (!hasSeenWelcome) {
         swal({
@@ -79,7 +79,7 @@ export default function GeneralApp() {
                     padding: 0 15px;
                     margin-bottom: 10px;
                   ">
-                    ${setting?.setting?.notif_message}
+                    ${marqueeMessage}
                   </div>
                 </div>
               `
@@ -99,7 +99,7 @@ export default function GeneralApp() {
         }).then((value) => {
           if (value) {
             // Mark welcome as seen
-            localStorage.setItem('hasSeenWelcome', 'true');
+            localStorage.setItem('hasSeenWelcome_v2', 'true');
           }
         });
 
@@ -171,6 +171,7 @@ export default function GeneralApp() {
             }
             .swal-custom-welcome-blue .swal-content {
               padding: 20px 10px 10px !important;
+              font-size: 14px !important;
             }
             .swal-button-custom-blue {
               padding: 10px 40px !important;
@@ -181,7 +182,7 @@ export default function GeneralApp() {
         document.head.appendChild(style);
       }
     }
-  }, [setting?.setting?.notif_show, setting?.setting?.notif_message]);
+  }, [marqueeMessage]);
 
 
   const AccessToken = window.localStorage.getItem('accessToken');
