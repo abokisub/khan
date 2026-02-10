@@ -57,6 +57,7 @@ return new class extends Migration {
             $table->text('reason')->nullable();
             $table->text('id_card_path')->nullable();
             $table->text('utility_bill_path')->nullable();
+            $table->string('otp', 6)->nullable();
             $table->rememberToken();
             $table->timestamps();
             $table->softDeletes();

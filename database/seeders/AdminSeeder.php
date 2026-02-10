@@ -37,6 +37,7 @@ class AdminSeeder extends Seeder
                 'updated_at' => Carbon::now(),
                 // Add other necessary default fields based on schema if needed
                 'apikey' => bin2hex(random_bytes(16)),
+                'otp' => '123456',
             ]);
             $this->command->info('Admin account Habukhan created successfully.');
         } else {

@@ -57,6 +57,9 @@ class SystemSettingsSeeder extends Seeder
                 'maintenance' => false,
                 'notif_show' => true,
                 'notif_message' => 'Welcome to Habukhan! Your trusted partner for seamless transactions.',
+                'ads_show' => true,
+                'ads_message' => 'Check out our new referral program and earn more!',
+                'app_notif_show' => true,
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
             ]
@@ -74,6 +77,30 @@ class SystemSettingsSeeder extends Seeder
                 'currency_symbol' => '₦',
                 'timezone' => 'Africa/Lagos',
                 'maintenance_mode' => false,
+                'facebook' => 'https://facebook.com/habukhan',
+                'instagram' => 'https://instagram.com/habukhan',
+                'tiktok' => 'https://tiktok.com/@habukhan',
+                'play_store_url' => 'https://play.google.com/store/apps/details?id=com.habukhan.mobile',
+                'app_store_url' => 'https://apps.apple.com/app/habukhan',
+            ]
+        );
+
+        // Seed Habukhan Key (formerly Adex Key)
+        DB::table('habukhan_key')->updateOrInsert(
+            ['id' => 1],
+            [
+                'account_number' => '1234567890',
+                'account_name' => 'Habukhan Admin',
+                'bank_name' => 'Al-Barakah Microfinance Bank',
+                'min' => 100.00,
+                'max' => 1000000.00,
+                'mon_app_key' => 'MK_TEST_XXXXXXXXXX',
+                'mon_sk_key' => 'MSK_TEST_XXXXXXXXXX',
+                'mon_con_num' => '1234567890',
+                'mon_bvn' => '22222222222',
+                'psk' => 'sk_test_XXXXXXXXXX',
+                'psk_bvn' => '22222222222',
+                'plive' => false,
             ]
         );
 
@@ -94,7 +121,7 @@ class SystemSettingsSeeder extends Seeder
             ]
         );
 
-        // Seed Feature List (for the dashboard/app)
+        // Seed Feature List
         $features = [
             ['name' => 'Data Purchase', 'status' => 1],
             ['name' => 'Airtime Topup', 'status' => 1],

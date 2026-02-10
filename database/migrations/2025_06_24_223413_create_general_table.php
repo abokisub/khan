@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      *
@@ -27,6 +26,11 @@ return new class extends Migration
                 $table->string('timezone', 50)->default('Africa/Lagos');
                 $table->boolean('maintenance_mode')->default(false);
                 $table->text('maintenance_message')->nullable();
+                $table->string('facebook', 255)->nullable();
+                $table->string('instagram', 255)->nullable();
+                $table->string('tiktok', 255)->nullable();
+                $table->string('play_store_url', 255)->nullable();
+                $table->string('app_store_url', 255)->nullable();
             });
         }
     }
