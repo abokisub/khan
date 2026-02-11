@@ -62,7 +62,6 @@ class PaymentPointService
             ])
                 ->withToken($apiSecret)
                 ->timeout(30)
-                ->connectTimeout(10)
                 ->post($url, $bodyData);
 
             if ($response->successful()) {
