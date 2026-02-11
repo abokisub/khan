@@ -2763,23 +2763,23 @@ class AdminController extends Controller
         $explode_url = explode(',', config('app.habukhan_app_key'));
         if (!$request->headers->get('origin') || in_array($request->headers->get('origin'), $explode_url)) {
             if (!empty($request->id)) {
-                $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
-                    $query->where('type', 'ADMIN');
-                });
-                if ($check_user->count() > 0) {
+                // Support both legacy (verifytoken) and modern (verifyapptoken) auth
+                $userId = $this->verifytoken($request->id) ?? $this->verifyapptoken($request->id);
+
+                if (!$userId) {
+                    return response()->json(['status' => 403, 'message' => 'Invalid Token'], 403);
+                }
+
+                $check_user = DB::table('user')->where(['status' => 1, 'id' => $userId, 'type' => 'ADMIN'])->first();
+
+                if ($check_user) {
+                    // Temporarily removed leftJoin("user") because 'added_by' column is missing in plan tables
+                    // This prevents SQL errors and allows the page to load while database schema is being addressed
                     return response()->json([
-                        'data_plans' => DB::table('data_plan')->leftJoin("user", function ($join) {
-                            $join->on("user.username", "=", "data_plan.added_by");
-                        })->orderBy('data_plan.id', 'desc')->get(),
-                        'cable_plans' => DB::table('cable_plan')->leftJoin("user", function ($join) {
-                            $join->on("user.username", "=", "cable_plan.added_by");
-                        })->orderBy('cable_plan.id', 'desc')->get(),
-                        'bill_plans' => DB::table('bill_plan')->leftJoin("user", function ($join) {
-                            $join->on("user.username", "=", "bill_plan.added_by");
-                        })->orderBy('bill_plan.id', 'desc')->get(),
-                        'result_plans' => DB::table('stock_result_pin')->leftJoin("user", function ($join) {
-                            $join->on("user.username", "=", "stock_result_pin.added_by");
-                        })->orderBy('stock_result_pin.id', 'desc')->get(),
+                        'data_plans' => DB::table('data_plan')->orderBy('id', 'desc')->get(),
+                        'cable_plans' => DB::table('cable_plan')->orderBy('id', 'desc')->get(),
+                        'bill_plans' => DB::table('bill_plan')->orderBy('id', 'desc')->get(),
+                        'result_plans' => DB::table('stock_result_pin')->orderBy('id', 'desc')->get(),
                     ]);
                 } else {
                     return response()->json([
