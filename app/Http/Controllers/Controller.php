@@ -218,21 +218,35 @@ class Controller extends BaseController
             return true;
         }
 
-        // 2. Check against allowed list
-        if (in_array($origin, $allowedOrigins)) {
-            return true;
+        // Clean origin for comparison (remove protocol and trailing slash)
+        $cleanOrigin = preg_replace('/^https?:\/\//', '', rtrim($origin, '/'));
+        $originHost = parse_url($origin, PHP_URL_HOST) ?: $cleanOrigin;
+
+        // 2. Check against allowed list (support both full origin and host-only)
+        foreach ($allowedOrigins as $allowed) {
+            $allowed = trim($allowed);
+            if ($origin === $allowed || $originHost === $allowed || $cleanOrigin === $allowed) {
+                return true;
+            }
+            // Allow subdomains of allowed domains if they are just domain names
+            if (strpos($cleanOrigin, $allowed) !== false) {
+                return true;
+            }
         }
 
-        // 3. Optional: check for exact match with APP_URL if not in list
+        // 3. Match against APP_URL host
         $appUrl = config('app.url');
-        if ($origin === $appUrl) {
+        $appHost = parse_url($appUrl, PHP_URL_HOST);
+        if ($originHost === $appHost || $cleanOrigin === $appHost) {
             return true;
         }
 
         \Log::warning('Origin Validation Failed', [
             'origin' => $origin,
+            'clean' => $cleanOrigin,
+            'host' => $originHost,
             'allowed' => $allowedOrigins,
-            'ip' => $request->ip(),
+            'app_host' => $appHost,
             'path' => $request->path()
         ]);
 
