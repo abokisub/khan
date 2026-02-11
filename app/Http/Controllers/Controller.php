@@ -470,15 +470,23 @@ class Controller extends BaseController
             if ($user && empty($user->paymentpoint_account_number)) {
                 // Check cooldown
                 $cacheKey = "paymentpoint_sync_" . $user->id;
+                \Log::info("PaymentPoint: Checking account for user " . $user->username);
+
                 if (\Cache::has($cacheKey)) {
+                    \Log::info("PaymentPoint: Skipping due to cache cooldown for " . $user->username);
                     return;
                 }
 
+                \Log::info("PaymentPoint: Attempting to create account for " . $user->username);
                 $service = new \App\Services\PaymentPointService(); // Use full namespace or import
                 $service->createVirtualAccount($user); // Pass model directly
 
                 // Set cooldown
                 \Cache::put($cacheKey, 'attempted', 10);
+            } else {
+                if ($user) {
+                    \Log::info("PaymentPoint: User " . $user->username . " already has account or is missing.");
+                }
             }
         } catch (\Exception $e) {
             \Log::error("PaymentPoint Account Error: " . $e->getMessage());
