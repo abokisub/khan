@@ -30,6 +30,8 @@ class PaymentPointWebhookController extends Controller
             $payload = $request->getContent();
             $signature = $request->header('Paymentpoint-Signature');
 
+            Log::info('PaymentPoint Webhook Headers', $request->headers->all());
+
             // Verify signature
             if (!$this->paymentPointService->verifyWebhookSignature($payload, $signature)) {
                 Log::warning('PaymentPoint webhook signature verification failed', [
@@ -80,9 +82,10 @@ class PaymentPointWebhookController extends Controller
             $transactionId = $data['transaction_id'];
             $customerEmail = $data['customer']['email'] ?? null;
 
-            // Find user by PaymentPoint account number
+            // Find user by PaymentPoint account number OR email (fallback)
             $user = DB::table('user')
                 ->where('paymentpoint_account_number', $accountNumber)
+                ->orWhere('email', $customerEmail)
                 ->first();
 
             if (!$user) {

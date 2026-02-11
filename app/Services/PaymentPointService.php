@@ -125,6 +125,6 @@ class PaymentPointService
 
         $calculatedSignature = hash_hmac('sha256', $payload, $secretKey);
 
-        return hash_equals($calculatedSignature, $signature);
+        return hash_equals($calculatedSignature, (string) $signature);
     }
 }
