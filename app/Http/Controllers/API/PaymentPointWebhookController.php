@@ -105,8 +105,11 @@ class PaymentPointWebhookController extends Controller
 
             // Find user by PaymentPoint account number OR email (fallback)
             $user = DB::table('user')
-                ->where('paymentpoint_account_number', $accountNumber)
-                ->orWhere('email', $customerEmail)
+                ->where('status', 1)
+                ->where(function ($query) use ($accountNumber, $customerEmail) {
+                    $query->where('paymentpoint_account_number', $accountNumber)
+                        ->orWhere('email', $customerEmail);
+                })
                 ->first();
 
             if (!$user) {

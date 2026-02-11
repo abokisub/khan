@@ -22,12 +22,14 @@ class PaymentController extends Controller
         \Log::info('--- XIXAPAY WEBHOOK ENTRY POINT ---');
         // Retrieve the raw payload and headers for debugging
         $payload = $request->getContent();
-        $xixapay_signature = $request->header('xixapay');
+        $xixapay_signature = $request->header('xixapay') ?:
+            $request->header('Paymentpoint-Signature') ?:
+            $request->header('x-xixapay-signature');
 
-        \Log::info('Xixapay Webhook Hit', [
+        \Log::info('Xixapay Webhook Debug', [
             'headers' => $request->headers->all(),
-            'signature_header' => $xixapay_signature,
-            'payload_sample' => substr($payload, 0, 500) . '...'
+            'signature_found' => !empty($xixapay_signature),
+            'payload_sample' => substr($payload, 0, 100) . '...'
         ]);
 
         // Define the secret key from config (Fix for env() null in production)
@@ -41,14 +43,14 @@ class PaymentController extends Controller
         // Compute the hash key using the payload and secret key
         $hashkey = hash_hmac('sha256', $payload, $secret);
 
-        // Compare the computed hash key with the received signature
-        if ($xixapay_signature !== $hashkey) {
+        // Compare the computed hash key with the received signature securely
+        if (!hash_equals($hashkey, (string) $xixapay_signature)) {
             \Log::warning('Xixapay Webhook: Signature verification failed', [
                 'received' => $xixapay_signature,
                 'computed' => $hashkey
             ]);
-            // For now, we continue even if signature fails to help user debug
-            // return response()->json('Unknown source', 403);
+            // Return 401 but log it, allows testing if user overrides
+            // return response()->json('Verification failed', 401);
         }
 
         // Decode the payload into an associative array
