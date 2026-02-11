@@ -95,6 +95,7 @@ class AuthController extends Controller
                         try {
                             $settings = DB::table('settings')->select(
                                 'palmpay_enabled',
+                                'paymentpoint_enabled',
                                 'monnify_enabled',
                                 'wema_enabled',
                                 'xixapay_enabled',
@@ -106,6 +107,7 @@ class AuthController extends Controller
                             $wema_enabled = $settings->wema_enabled ?? true;
                             $xixapay_enabled = $settings->xixapay_enabled ?? true;
                             $palmpay_enabled = $settings->palmpay_enabled ?? true;
+                            $paymentpoint_enabled = $settings->paymentpoint_enabled ?? true;
                             $default_virtual_account = $settings->default_virtual_account ?? 'palmpay';
                             $default_virtual_account = ($default_virtual_account == 'palmpay') ? 'xixapay' : $default_virtual_account; // Migration for name change if needed
                         } catch (\Exception $e) {
@@ -113,6 +115,7 @@ class AuthController extends Controller
                             $wema_enabled = false;
                             $xixapay_enabled = false;
                             $palmpay_enabled = true;
+                            $paymentpoint_enabled = true;
                             $default_virtual_account = 'palmpay';
                         }
 
@@ -286,6 +289,7 @@ class AuthController extends Controller
                     try {
                         $settings = DB::table('settings')->select(
                             'palmpay_enabled',
+                            'paymentpoint_enabled',
                             'monnify_enabled',
                             'wema_enabled',
                             'xixapay_enabled',
@@ -309,6 +313,7 @@ class AuthController extends Controller
                         $wema_enabled = true;
                         $xixapay_enabled = true;
                         $palmpay_enabled = true;
+                        $paymentpoint_enabled = true;
                         $default_virtual_account = 'palmpay';
                     }
 
