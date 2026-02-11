@@ -14,9 +14,9 @@ class PaymentPointService
 
     public function __construct()
     {
-        $this->apiKey = env('PAYMENTPOINT_API_KEY');
-        $this->apiSecret = env('PAYMENTPOINT_API_SECRET');
-        $this->businessId = env('PAYMENTPOINT_BUSINESS_ID');
+        $this->apiKey = config('services.paymentpoint.api_key');
+        $this->apiSecret = config('services.paymentpoint.api_secret');
+        $this->businessId = config('services.paymentpoint.business_id');
         $this->baseUrl = 'https://api.paymentpoint.co';
     }
 

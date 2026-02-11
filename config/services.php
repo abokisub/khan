@@ -36,4 +36,10 @@ return [
         'business_id' => env('XIXAPAY_BUSINESS_ID'),
     ],
 
+    'paymentpoint' => [
+        'api_key' => env('PAYMENTPOINT_API_KEY'),
+        'api_secret' => env('PAYMENTPOINT_API_SECRET'),
+        'business_id' => env('PAYMENTPOINT_BUSINESS_ID'),
+    ],
+
 ];
