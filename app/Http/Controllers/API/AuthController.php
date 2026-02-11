@@ -143,8 +143,14 @@ class AuthController extends Controller
                             \Log::error("Register Monnify: " . $e->getMessage());
                         }
 
-                        // if ($palmpay_enabled || $monnify_enabled)
-                        //    $this->paymentpoint_account($user->username);
+
+                        try {
+                            if ($paymentpoint_enabled)
+                                $this->paymentpoint_account($user->username);
+                        } catch (\Exception $e) {
+                            \Log::error("Register PaymentPoint: " . $e->getMessage());
+                        }
+
                         try {
                             $this->paystack_account($user->username);
                         } catch (\Exception $e) {
