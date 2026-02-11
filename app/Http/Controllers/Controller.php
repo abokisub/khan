@@ -193,12 +193,13 @@ class Controller extends BaseController
 
     public function verifytoken($request)
     {
-        if (DB::table('user')->where('habukhan_key', $request)->count() == 1) {
-            $user = DB::table('user')->where('habukhan_key', $request)->first();
-            return $user->id;
-        } else {
-            return null;
+        $userId = DB::table('user')->where('habukhan_key', $request)->value('id');
+        if ($userId) {
+            return $userId;
         }
+
+        // Support modern Sanctum tokens via verifyapptoken
+        return $this->verifyapptoken($request);
     }
 
     /**
