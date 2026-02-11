@@ -813,6 +813,7 @@ class AppController extends Controller
                 if ($check_user->count() > 0) {
                     $habukhan = $check_user->first();
                     $habukhan_username = $habukhan->username;
+                    $profile_image = []; // Initialize
                     // user request
                     $user_request = DB::table('notif')->where('username', $habukhan_username);
                     if ($user_request->count() > 0) {

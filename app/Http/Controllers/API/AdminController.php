@@ -24,7 +24,7 @@ class AdminController extends Controller
                     $query->where('type', 'ADMIN');
                 });
                 if ($check_user->count() > 0) {
-                    // user request
+                    $profile_image = []; // Initialize to empty array
                     $user_request = DB::table('request')->select('username', 'message', 'date', 'transid', 'status', 'title', 'transid', 'id');
                     if ($user_request->count() > 0) {
                         foreach ($user_request->orderBy('id', 'desc')->get() as $habukhan) {
@@ -40,11 +40,11 @@ class AdminController extends Controller
                                 $profile_image[] = ['username' => $habukhan->username, 'transid' => $habukhan->transid, 'title' => $habukhan->title, 'id' => $habukhan->id, 'message' => $habukhan->message, 'date' => $habukhan->date, 'profile_image' => $habukhan->username, 'status' => $habukhan->status];
                             }
                         }
-                        return response()->json([
-                            'status' => 'success',
-                            'notif' => $profile_image
-                        ]);
                     }
+                    return response()->json([
+                        'status' => 'success',
+                        'notif' => $profile_image
+                    ]);
                 } else {
                     return response()->json([
                         'status' => 403,
@@ -58,7 +58,7 @@ class AdminController extends Controller
                 ])->setStatusCode(403);
             }
         } else {
-            return redirect(config('app.error_500'));
+            return response()->json(['status' => 500, 'message' => 'Invalid Origin'], 500);
         }
     }
     public function ClearRequest(Request $request)
