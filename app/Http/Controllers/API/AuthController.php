@@ -415,9 +415,9 @@ class AuthController extends Controller
                                             'PalmPay'))))
                         ),
 
-                        'paymentpoint_account_number' => $user->paymentpoint_account_number,
-                        'paymentpoint_account_name' => $user->paymentpoint_account_name,
-                        'paymentpoint_bank_name' => $user->paymentpoint_bank_name,
+                        'paymentpoint_account_number' => $user->paymentpoint_account_number ?? null,
+                        'paymentpoint_account_name' => $user->paymentpoint_account_name ?? null,
+                        'paymentpoint_bank_name' => $user->paymentpoint_bank_name ?? null,
 
                         'paystack_account' => $user->paystack_account,
                         'paystack_bank' => $user->paystack_bank,
@@ -689,6 +689,7 @@ class AuthController extends Controller
                             $wema_enabled = true;
                             $xixapay_enabled = true;
                             $palmpay_enabled = true;
+                            $paymentpoint_enabled = true;
                             $default_virtual_account = 'palmpay';
                         }
 
@@ -717,7 +718,7 @@ class AuthController extends Controller
 
                         // Correctly check and generate accounts on login
                         try {
-                            if ($paymentpoint_enabled && empty($user->paymentpoint_account_number)) {
+                            if (($paymentpoint_enabled ?? false) && empty($user->paymentpoint_account_number ?? null)) {
                                 \Log::info("Login: Generating PaymentPoint account for " . $user->username);
                                 $this->paymentpoint_account($user->username);
                             }

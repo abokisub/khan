@@ -38,10 +38,13 @@ class Banks extends Controller
                 // Determine active PalmPay provider charge logic if needed, but per-provider charge is clearer below
 
                 // Fetch Sorted Locks
-                $locks = DB::table('virtual_account_locks')
-                    ->orderBy('sort_order', 'asc')
-                    ->orderBy('id', 'asc')
-                    ->get();
+                $locks = [];
+                if (\Illuminate\Support\Facades\Schema::hasTable('virtual_account_locks')) {
+                    $locks = DB::table('virtual_account_locks')
+                        ->orderBy('sort_order', 'asc')
+                        ->orderBy('id', 'asc')
+                        ->get();
+                }
 
                 $banks_array = [];
 
