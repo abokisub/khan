@@ -22,7 +22,11 @@ class VirtualAccountLockController extends Controller
             $locks = DB::table('virtual_account_locks')
                 ->orderBy('sort_order', 'asc')
                 ->orderBy('id', 'asc')
-                ->get();
+                ->get()
+                ->map(function ($lock) {
+                    $lock->is_locked = (bool) $lock->is_locked;
+                    return $lock;
+                });
 
             return response()->json([
                 'status' => 'success',
@@ -70,21 +74,24 @@ class VirtualAccountLockController extends Controller
                 ], 404);
             }
 
-            // Toggle the lock status
+            // Toggle the lock status based on current numeric/bool value
+            $isLocked = (bool) $lock->is_locked;
+            $newIsLocked = !$isLocked;
+
             DB::table('virtual_account_locks')
                 ->where('provider', $request->provider)
                 ->where('account_type', $request->account_type)
                 ->update([
-                    'is_locked' => !$lock->is_locked,
+                    'is_locked' => $newIsLocked,
                     'updated_at' => now(),
                 ]);
 
-            $newStatus = !$lock->is_locked ? 'locked' : 'unlocked';
+            $newStatusText = $newIsLocked ? 'locked' : 'unlocked';
 
             return response()->json([
                 'status' => 'success',
-                'message' => ucfirst($request->provider) . ' (' . ucfirst($request->account_type) . ') has been ' . $newStatus,
-                'is_locked' => !$lock->is_locked,
+                'message' => ucfirst($request->provider) . ' (' . ucfirst($request->account_type) . ') has been ' . $newStatusText,
+                'is_locked' => $newIsLocked,
             ]);
         } catch (\Exception $e) {
             return response()->json([

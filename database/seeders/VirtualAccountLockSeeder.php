@@ -14,6 +14,9 @@ class VirtualAccountLockSeeder extends Seeder
      */
     public function run()
     {
+        // Cleanup old redundant or inconsistent records
+        DB::table('virtual_account_locks')->where('account_type', 'monniepoint')->delete();
+
         $locks = [
             ['provider' => 'xixapay', 'account_type' => 'palmpay', 'is_locked' => false, 'sort_order' => 1],
             ['provider' => 'paymentpoint', 'account_type' => 'palmpay', 'is_locked' => false, 'sort_order' => 2],
