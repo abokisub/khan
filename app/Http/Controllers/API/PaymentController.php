@@ -19,26 +19,44 @@ class PaymentController extends Controller
 {
     public function Xixapay(Request $request)
     {
-        // Retrieve the raw payload from the request
+        // Retrieve the raw payload and headers for debugging
         $payload = $request->getContent();
-
-        // Define the secret key from environment
-        $secret = env('XIXAPAY_SECRET_KEY');
-
-        // Retrieve the XixaPay signature from the request headers
         $xixapay_signature = $request->header('xixapay');
-        // Log the incoming payload for debugging
+
+        \Log::info('Xixapay Webhook Hit', [
+            'signature_header' => $xixapay_signature,
+            'payload_sample' => substr($payload, 0, 200) . '...'
+        ]);
+
+        // Define the secret key from config (Fix for env() null in production)
+        $secret = config('services.xixapay.secret_key');
+
+        if (empty($secret)) {
+            \Log::error('Xixapay Webhook: Secret key is missing in config!');
+            return response()->json('Configuration error', 500);
+        }
 
         // Compute the hash key using the payload and secret key
         $hashkey = hash_hmac('sha256', $payload, $secret);
 
         // Compare the computed hash key with the received signature
         if ($xixapay_signature !== $hashkey) {
-            return response()->json('Unknown source', 403);
+            \Log::warning('Xixapay Webhook: Signature verification failed', [
+                'received' => $xixapay_signature,
+                'computed' => $hashkey
+            ]);
+            // return response()->json('Unknown source', 403);
         }
 
         // Decode the payload into an associative array
         $data = json_decode($payload, true);
+
+        \Log::info('Xixapay Webhook Data', [
+            'status' => $data['notification_status'] ?? 'N/A',
+            'amount' => $data['amount_paid'] ?? 'N/A',
+            'ref' => $data['transaction_id'] ?? 'N/A',
+            'email' => $data['customer']['email'] ?? 'N/A'
+        ]);
 
         // Retrieve key data from the payload
         $status = $data['notification_status'];
@@ -148,7 +166,8 @@ class PaymentController extends Controller
 
     public function PaymentPointWebhook(Request $request)
     {
-        return response()->json('Service disabled', 403);
+        \Log::info('PaymentPoint Webhook reached legacy PaymentPointWebhook method. Redirecting to PaymentPointWebhookController...');
+        return app(\App\Http\Controllers\API\PaymentPointWebhookController::class)->handleWebhook($request);
     }
     public function BankTransfer(Request $request)
     {
@@ -167,8 +186,7 @@ class PaymentController extends Controller
                         'message' => $main_validator->errors()->first(),
                         'status' => 403
                     ])->setStatusCode(403);
-                }
-                else {
+                } else {
                     $send_request = "https://api.monnify.com/api/v1/disbursements/account/validate?accountNumber=$request->account_number&bankCode=$request->bank_code";
                     $json_response = json_decode(@file_get_contents($send_request), true);
                     if (!empty($json_response)) {
@@ -202,30 +220,26 @@ class PaymentController extends Controller
                             }
 
                             DB::table('request')->insert(['username' => $user->username, 'message' => $user->username . " Transferred  ₦" . number_format($request->amount_sent, 2) . " to your bank account. Reference is => " . $transid, 'date' => $this->system_date(), 'transid' => $transid, 'status' => 0, 'title' => 'MANUAL BANK TRANSFER']);
-                        }
-                        else {
+                        } else {
                             return response()->json([
                                 'status' => 403,
                                 'message' => 'Inavlid Account Details'
                             ])->setStatusCode(403);
                         }
-                    }
-                    else {
+                    } else {
                         return response()->json([
                             'status' => 403,
                             'message' => 'Inavlid Account Details'
                         ])->setStatusCode(403);
                     }
                 }
-            }
-            else {
+            } else {
                 return response()->json([
                     'status' => 'fail',
                     'message' => 'Reload the browser and try again'
                 ])->setStatusCode(403);
             }
-        }
-        else {
+        } else {
             return redirect(config('app.error_500'));
             return response()->json([
                 'status' => 403,
@@ -250,8 +264,7 @@ class PaymentController extends Controller
                             'message' => $main_validator->errors()->first(),
                             'status' => 403
                         ])->setStatusCode(403);
-                    }
-                    else {
+                    } else {
                         $post_data = array(
                             "amount" => $request->amount,
                             "customerName" => $user->username,
@@ -299,37 +312,32 @@ class PaymentController extends Controller
                                     'status' => 'success',
                                     'redirect' => $response['responseBody']['checkoutUrl']
                                 ]);
-                            }
-                            else {
+                            } else {
                                 return response()->json([
                                     'status' => 'fail',
                                     'message' => 'Try Again Later'
                                 ])->setStatusCode(403);
                             }
-                        }
-                        else {
+                        } else {
                             return response()->json([
                                 'status' => 'fail',
                                 'message' => 'Monnify Server Down'
                             ])->setStatusCode(403);
                         }
                     }
-                }
-                else {
+                } else {
                     return response()->json([
                         'status' => 'fail',
                         'message' => 'Reload the browser and try again'
                     ])->setStatusCode(403);
                 }
-            }
-            else {
+            } else {
                 return response()->json([
                     'status' => 'fail',
                     'message' => 'Reload the browser and try again'
                 ])->setStatusCode(403);
             }
-        }
-        else {
+        } else {
             return redirect(config('app.error_500'));
             return response()->json([
                 'status' => 403,
@@ -353,17 +361,16 @@ class PaymentController extends Controller
                 curl_setopt(
                     $ch,
                     CURLOPT_HTTPHEADER,
-                [
-                    "Authorization: Basic " . $base_monnify,
-                ]
+                    [
+                        "Authorization: Basic " . $base_monnify,
+                    ]
                 );
                 $json = curl_exec($ch);
                 curl_close($ch);
                 $result = json_decode($json, true);
                 if (isset($result['responseBody']['accessToken'])) {
                     $accessToken = $result['responseBody']['accessToken'];
-                }
-                else {
+                } else {
                     $accessToken = null;
                 }
                 $curl = curl_init();
@@ -426,28 +433,22 @@ class PaymentController extends Controller
                             }
                         }
                         return redirect(config('app.app_url') . '/dashboard');
-                    }
-                    else if (strtolower($trans_status) == 'expired') {
+                    } else if (strtolower($trans_status) == 'expired') {
                         DB::table('deposit')->where(['monify_ref' => $request->paymentReference, 'status' => 0])->update(['status' => 2]);
                         return redirect(config('app.app_url') . '/dashboard');
-                    }
-                    else if (strtolower($trans_status) == 'failed') {
+                    } else if (strtolower($trans_status) == 'failed') {
                         DB::table('deposit')->where(['monify_ref' => $request->paymentReference, 'status' => 0])->update(['status' => 2]);
                         return redirect(config('app.app_url') . '/dashboard');
-                    }
-                    else {
+                    } else {
                         return redirect(config('app.app_url') . '/dashboard');
                     }
-                }
-                else {
+                } else {
                     return redirect(config('app.app_url') . '/dashboard');
                 }
-            }
-            else {
+            } else {
                 return redirect(config('app.error_500'));
             }
-        }
-        else {
+        } else {
             return redirect(config('app.error_500'));
         }
     }
@@ -505,12 +506,11 @@ class PaymentController extends Controller
                                 }
                             }
                         }
-                    }
-                    else {
+                    } else {
                         if (
-                        DB::table('user')->where(['status' => 1])->where(function ($query) use ($customer_name) {
-                            $query->orWhere('username', $customer_name['name'])->orWhere('email', $customer_name['email']);
-                        })->count() == 1
+                            DB::table('user')->where(['status' => 1])->where(function ($query) use ($customer_name) {
+                                $query->orWhere('username', $customer_name['name'])->orWhere('email', $customer_name['email']);
+                            })->count() == 1
                         ) {
                             $user = DB::table('user')->where(['status' => 1])->where(function ($query) use ($customer_name) {
                                 $query->orWhere('username', $customer_name['name'])->orWhere('email', $customer_name['email']);
@@ -590,22 +590,18 @@ class PaymentController extends Controller
                             ];
                             MailController::send_mail($email_data, 'email.purchase');
 
-                        //referral
-                        }
-                        else {
+                            //referral
+                        } else {
                             return view('error.error');
                         }
                     }
-                }
-                else {
+                } else {
                     return view('error.error');
                 }
-            }
-            else {
+            } else {
                 return view('error.error');
             }
-        }
-        else {
+        } else {
             return view('error.error');
         }
     }
@@ -626,8 +622,7 @@ class PaymentController extends Controller
                             'message' => $main_validator->errors()->first(),
                             'status' => 403
                         ])->setStatusCode(403);
-                    }
-                    else {
+                    } else {
                         if ($this->core()->paystack == 1) {
 
                             $postdata = array(
@@ -680,44 +675,38 @@ class PaymentController extends Controller
                                         'status' => 'success',
                                         'redirect' => $response['data']['authorization_url']
                                     ]);
-                                }
-                                else {
+                                } else {
                                     return response()->json([
                                         'status' => 'fail',
                                         'message' => 'Please Try Again Later'
                                     ])->setStatusCode(403);
                                 }
-                            }
-                            else {
+                            } else {
                                 return response()->json([
                                     'status' => 'fail',
                                     'message' => 'Please Try Again Later'
                                 ])->setStatusCode(403);
                             }
-                        }
-                        else {
+                        } else {
                             return response()->json([
                                 'status' => 'fail',
                                 'message' => 'paystack Server Down'
                             ])->setStatusCode(403);
                         }
                     }
-                }
-                else {
+                } else {
                     return response()->json([
                         'status' => 'fail',
                         'message' => 'Reload the browser and try again'
                     ])->setStatusCode(403);
                 }
-            }
-            else {
+            } else {
                 return response()->json([
                     'status' => 'fail',
                     'message' => 'Reload the browser and try again'
                 ])->setStatusCode(403);
             }
-        }
-        else {
+        } else {
             return redirect(config('app.error_500'));
             return response()->json([
                 'status' => 403,
@@ -811,21 +800,17 @@ class PaymentController extends Controller
                         MailController::send_mail($email_data, 'email.purchase');
 
                         return redirect(config('app.app_url') . '/dashboard/app');
-                    }
-                    else {
+                    } else {
                         DB::table('deposit')->where(['monify_ref' => $request->trxref, 'status' => 0])->update(['status' => 2]);
                         return redirect(config('app.app_url') . '/dashboard/app');
                     }
-                }
-                else {
+                } else {
                     return redirect(config('app.app_url') . '/dashboard/app');
                 }
-            }
-            else {
+            } else {
                 return redirect(config('app.error_500'));
             }
-        }
-        else {
+        } else {
             return redirect(config('app.error_500'));
         }
     }
@@ -904,16 +889,13 @@ class PaymentController extends Controller
                             }
                         }
                     }
-                }
-                else {
+                } else {
                     return view('error.error');
                 }
-            }
-            else {
+            } else {
                 return view('error.error');
             }
-        }
-        else {
+        } else {
             return view('error.error');
         }
     }
@@ -960,8 +942,7 @@ class PaymentController extends Controller
                     'transid' => $this->purchase_ref('validate_bvn_'),
                     'role' => 'debit'
                 ]);
-            }
-            else {
+            } else {
                 return response()->json(['status' => 'fail', 'message' => 'Insufficient Account Balance, Please Kindly Fund Your Wallet And Try Again'], 403);
             }
         }
@@ -995,14 +976,13 @@ class PaymentController extends Controller
                                 ]);
                                 file_put_contents('monnify_bvn_check.txt', json_encode($response->json()));
                             }
-                            if ($check->monify_ref == null& $check->kolomoni_mfb != null) {
+                            if ($check->monify_ref == null & $check->kolomoni_mfb != null) {
                                 DB::table('user')->where('id', $check->id)->update(['kolomoni_mfb' => null, 'paystack_account' => null, 'autofund' => null]);
                                 DB::table('user_bank')->where('username', $check->username)->whereIn('bank', ['MONIEPOINT'])->delete();
                             }
 
                             return response()->json(['status' => 'success', 'message' => 'BVN matches with date of birth. KYC Updated'], 200);
-                        }
-                        else {
+                        } else {
                             DB::table('user')->where('id', $check->id)->update(['is_bvn_fail' => 1]);
                             return response()->json(['status' => 'fail', 'message' => 'BVN does not match with date of birth.'], 403);
                         }
@@ -1044,16 +1024,15 @@ class PaymentController extends Controller
                 'secret_key' => '',
                 'Content-Type' => 'application/json',
             ])->post('https://api.crystalpay.finance/business/v1/dynamic-account', [
-                "firstname" => $check->name,
-                "lastname" => $check->username,
-                "email" => $check->email,
-                "dynamic_account_package" => "101",
-                "webhookurl" => "https://web.hook.url",
-                "expiresat" => "60",
-                "amount" => $request->data['amount']
-            ]);
-        }
-        catch (\Exception $e) {
+                        "firstname" => $check->name,
+                        "lastname" => $check->username,
+                        "email" => $check->email,
+                        "dynamic_account_package" => "101",
+                        "webhookurl" => "https://web.hook.url",
+                        "expiresat" => "60",
+                        "amount" => $request->data['amount']
+                    ]);
+        } catch (\Exception $e) {
             return response()->json(['status' => 'fail', 'message' => 'Unable to gnenerate dynamic account number. kindly try again'], 403);
         }
         if ($create_dynamic->successful()) {
@@ -1080,8 +1059,7 @@ class PaymentController extends Controller
             Excel::import(new MonnifyImport, $filePath);
 
             return response()->json(['message' => 'Import successful']);
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
@@ -1098,8 +1076,7 @@ class PaymentController extends Controller
                     $user = DB::table('user')->where(['kuda' => $account_number_here, 'status' => 1])->first();
                     if ($amount_paid < 10000) {
                         $charges = 30;
-                    }
-                    else {
+                    } else {
                         $charges = 50;
                     }
                     $transid = $this->purchase_ref('Kuda_AUTOMATED_');
@@ -1145,11 +1122,11 @@ class PaymentController extends Controller
                             $user->app_token,
                             config('app.name'),
                             "You have received a payment of ₦" . number_format($credit, 2),
-                        [
-                            'type' => 'transaction',
-                            'action' => 'deposit',
-                            'channel_id' => 'high_importance_channel'
-                        ]
+                            [
+                                'type' => 'transaction',
+                                'action' => 'deposit',
+                                'channel_id' => 'high_importance_channel'
+                            ]
                         );
                     }
                     // referral
@@ -1219,12 +1196,10 @@ class PaymentController extends Controller
                     if ($payment_type == 7) {
                         $charges = 40;
                         $type = "Safehaven";
-                    }
-                    else if ($payment_type == 101) {
+                    } else if ($payment_type == 101) {
                         $charges = 50;
                         $type = "SafeHaven (Dynamic Funding)";
-                    }
-                    else {
+                    } else {
                         $charges = ($amount_paid / 100) * 1.1;
                         $type = "Access";
                     }

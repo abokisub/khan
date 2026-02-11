@@ -510,4 +510,5 @@ Route::get('admin/card/customer/info/{cardId}/{id}/secure', [AdminController::cl
 Route::post('xixapay/webhook', [PaymentController::class, 'Xixapay']);
 Route::post('webhooks/xixapay/card', [WebhookController::class, 'handleCardWebhook']); // Phase 6
 Route::post('monnify/webhook', [PaymentController::class, 'MonnifyWebhook']);
-Route::post('paymentpoint/webhook/secure/callback/pay/habukhan/0001', [PaymentController::class, 'PaymentPointWebhook']);
+Route::post('paymentpoint/webhook/secure/callback/pay/habukhan/0001', [\App\Http\Controllers\API\PaymentPointWebhookController::class, 'handleWebhook']);
+Route::post('xixapay_webhook/secure/callback/pay/habukhan/0001', [\App\Http\Controllers\API\PaymentPointWebhookController::class, 'handleWebhook']);

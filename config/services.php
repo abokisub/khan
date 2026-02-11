@@ -34,6 +34,7 @@ return [
         'authorization' => 'Bearer ' . env('XIXAPAY_SECRET_KEY'),
         'api_key' => env('XIXAPAY_API_KEY'),
         'business_id' => env('XIXAPAY_BUSINESS_ID'),
+        'secret_key' => env('XIXAPAY_SECRET_KEY'),
     ],
 
     'paymentpoint' => [
