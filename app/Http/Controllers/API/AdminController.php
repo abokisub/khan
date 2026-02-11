@@ -2760,8 +2760,7 @@ class AdminController extends Controller
     }
     public function AllSystemPlan(Request $request)
     {
-        $explode_url = explode(',', config('app.habukhan_app_key'));
-        if (!$request->headers->get('origin') || in_array($request->headers->get('origin'), $explode_url)) {
+        if ($this->isValidOrigin($request)) {
             if (!empty($request->id)) {
                 // Support both legacy (verifytoken) and modern (verifyapptoken) auth
                 $userId = $this->verifytoken($request->id) ?? $this->verifyapptoken($request->id);

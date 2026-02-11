@@ -59,9 +59,7 @@ class AppController extends Controller
 
     public function getDiscountOther(Request $request)
     {
-        $explode_url = explode(',', config('app.habukhan_app_key'));
-        $origin = $request->headers->get('origin');
-        if (!$origin || in_array($origin, $explode_url)) {
+        if ($this->isValidOrigin($request)) {
             $settings = DB::table('settings')->select('monnify_charge', 'xixapay_charge', 'paystack_charge', 'paymentpoint_charge')->first();
             $cardSettings = DB::table('card_settings')->where('id', 1)->first();
 
@@ -91,9 +89,7 @@ class AppController extends Controller
 
     public function getDiscountSystem(Request $request)
     {
-        $explode_url = explode(',', config('app.habukhan_app_key'));
-        $origin = $request->headers->get('origin');
-        if (!$origin || in_array($origin, $explode_url)) {
+        if ($this->isValidOrigin($request)) {
             $settings = DB::table('settings')->first();
             return response()->json([
                 'status' => 'success',
@@ -115,9 +111,7 @@ class AppController extends Controller
 
     public function getDiscountBanks(Request $request)
     {
-        $explode_url = explode(',', config('app.habukhan_app_key'));
-        $origin = $request->headers->get('origin');
-        if (!$origin || in_array($origin, $explode_url)) {
+        if ($this->isValidOrigin($request)) {
             $settings = DB::table('settings')->select(
                 'transfer_charge_type',
                 'transfer_charge_value',
@@ -142,9 +136,7 @@ class AppController extends Controller
 
     public function getVirtualAccountStatus(Request $request)
     {
-        $explode_url = explode(',', config('app.habukhan_app_key'));
-        $origin = $request->headers->get('origin');
-        if (!$origin || in_array($origin, $explode_url)) {
+        if ($this->isValidOrigin($request)) {
             $settings = DB::table('settings')->select(
                 'palmpay_enabled',
                 'monnify_enabled',

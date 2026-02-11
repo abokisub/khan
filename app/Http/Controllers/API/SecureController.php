@@ -12,24 +12,12 @@ use App\Http\Controllers\MailController;
 
 class SecureController extends Controller
 {
-    private function verifyOrigin(Request $request)
-    {
-        $allowed = explode(',', config('app.habukhan_app_key'));
-        $origin = $request->headers->get('origin');
-
-        // Allow if no origin (could be same domain or tool), or if in whitelist
-        if (!$origin || in_array($origin, $allowed) || $origin === $request->getSchemeAndHttpHost()) {
-            return true;
-        }
-
-        return false;
-    }
 
     public function Airtimelock(Request $request)
     {
-        if ($this->verifyOrigin($request)) {
+        if ($this->isValidOrigin($request)) {
             if (!empty($request->id)) {
-                $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifyapptoken($request->id)])->where(function ($query) {
+                $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN');
                 });
                 if ($check_user->count() > 0) {
@@ -148,7 +136,7 @@ class SecureController extends Controller
     }
     public function DataLock(Request $request)
     {
-        if ($this->verifyOrigin($request)) {
+        if ($this->isValidOrigin($request)) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN');
@@ -336,7 +324,7 @@ class SecureController extends Controller
     }
     public function CableLock(Request $request)
     {
-        if ($this->verifyOrigin($request)) {
+        if ($this->isValidOrigin($request)) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN');
@@ -380,7 +368,7 @@ class SecureController extends Controller
                     } else {
                         return response()->json([
                             'status' => 403,
-                            'messgae' => 'Unable to update'
+                            'message' => 'Unable to update'
                         ])->setStatusCode(403);
                     }
                 } else {
@@ -405,7 +393,7 @@ class SecureController extends Controller
     }
     public function ResultLock(Request $request)
     {
-        if ($this->verifyOrigin($request)) {
+        if ($this->isValidOrigin($request)) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN');
@@ -434,17 +422,11 @@ class SecureController extends Controller
                         'nabteb' => $nabteb,
                     ];
 
-                    if (DB::table('cable_result_lock')->update($data)) {
-                        return response()->json([
-                            'status' => 'success',
-                            'message' => 'Updated'
-                        ]);
-                    } else {
-                        return response()->json([
-                            'status' => 403,
-                            'messgae' => 'Unable to update'
-                        ])->setStatusCode(403);
-                    }
+                    DB::table('cable_result_lock')->update($data);
+                    return response()->json([
+                        'status' => 'success',
+                        'message' => 'Updated'
+                    ]);
                 } else {
                     return response()->json([
                         'status' => 403,
@@ -467,7 +449,7 @@ class SecureController extends Controller
     }
     public function OtherLock(Request $request)
     {
-        if ($this->verifyOrigin($request)) {
+        if ($this->isValidOrigin($request)) {
             if (!empty($request->id)) {
                 $userId = $this->verifytoken($request->id);
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $userId, 'type' => 'ADMIN'])->first();
@@ -1472,7 +1454,7 @@ class SecureController extends Controller
     }
     public function RNetwork(Request $request)
     {
-        if ($this->verifyOrigin($request)) {
+        if ($this->isValidOrigin($request)) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN');
@@ -1589,7 +1571,7 @@ class SecureController extends Controller
     }
     public function EditHabukhanApi(Request $request)
     {
-        if ($this->verifyOrigin($request)) {
+        if ($this->isValidOrigin($request)) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN');
@@ -1636,7 +1618,7 @@ class SecureController extends Controller
     }
     public function EditAdexApi(Request $request)
     {
-        if ($this->verifyOrigin($request)) {
+        if ($this->isValidOrigin($request)) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN');
@@ -1683,7 +1665,7 @@ class SecureController extends Controller
     }
     public function EditMsorgApi(Request $request)
     {
-        if ($this->verifyOrigin($request)) {
+        if ($this->isValidOrigin($request)) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN');
@@ -1731,7 +1713,7 @@ class SecureController extends Controller
     }
     public function EditVirusApi(Request $request)
     {
-        if ($this->verifyOrigin($request)) {
+        if ($this->isValidOrigin($request)) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN');
@@ -1779,7 +1761,7 @@ class SecureController extends Controller
     }
     public function EditOtherApi(Request $request)
     {
-        if ($this->verifyOrigin($request)) {
+        if ($this->isValidOrigin($request)) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN');
@@ -1835,7 +1817,7 @@ class SecureController extends Controller
     }
     public function EditWebUrl(Request $request)
     {
-        if ($this->verifyOrigin($request)) {
+        if ($this->isValidOrigin($request)) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN');
@@ -1893,7 +1875,7 @@ class SecureController extends Controller
     }
     public function RResult(Request $request)
     {
-        if ($this->verifyOrigin($request)) {
+        if ($this->isValidOrigin($request)) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN');
@@ -1944,7 +1926,7 @@ class SecureController extends Controller
     }
     public function AddResult(Request $request)
     {
-        if ($this->verifyOrigin($request)) {
+        if ($this->isValidOrigin($request)) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN');
@@ -2031,7 +2013,7 @@ class SecureController extends Controller
     }
     public function DelteResult(Request $request)
     {
-        if ($this->verifyOrigin($request)) {
+        if ($this->isValidOrigin($request)) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN');
@@ -2075,7 +2057,7 @@ class SecureController extends Controller
     }
     public function EditResult(Request $request)
     {
-        if ($this->verifyOrigin($request)) {
+        if ($this->isValidOrigin($request)) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN');
@@ -2138,7 +2120,7 @@ class SecureController extends Controller
     }
     public function UserStock(Request $request)
     {
-        if ($this->verifyOrigin($request)) {
+        if ($this->isValidOrigin($request)) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)]);
                 if ($check_user->count() == 1) {
@@ -2172,7 +2154,7 @@ class SecureController extends Controller
     }
     public function UserEditStock(Request $request)
     {
-        if ($this->verifyOrigin($request)) {
+        if ($this->isValidOrigin($request)) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)]);
                 if ($check_user->count() == 1) {
@@ -2288,7 +2270,7 @@ class SecureController extends Controller
     }
     public function UserProfile(Request $request)
     {
-        if ($this->verifyOrigin($request)) {
+        if ($this->isValidOrigin($request)) {
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)]);
                 if ($check_user->count() == 1) {
