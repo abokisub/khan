@@ -669,6 +669,7 @@ class AuthController extends Controller
                         try {
                             $settings = DB::table('settings')->select(
                                 'palmpay_enabled',
+                                'paymentpoint_enabled',
                                 'monnify_enabled',
                                 'wema_enabled',
                                 'xixapay_enabled',
@@ -680,6 +681,7 @@ class AuthController extends Controller
                             $wema_enabled = $settings->wema_enabled ?? true;
                             $xixapay_enabled = $settings->xixapay_enabled ?? true;
                             $palmpay_enabled = $settings->palmpay_enabled ?? true;
+                            $paymentpoint_enabled = $settings->paymentpoint_enabled ?? true;
                             $default_virtual_account = $settings->default_virtual_account ?? 'palmpay';
                             $default_virtual_account = ($default_virtual_account == 'palmpay') ? 'xixapay' : $default_virtual_account; // Migration for name change if needed
                         } catch (\Exception $e) {
@@ -712,6 +714,16 @@ class AuthController extends Controller
                                 $active_default = 'xixapay';
                         }
 
+
+                        // Correctly check and generate accounts on login
+                        try {
+                            if ($paymentpoint_enabled && empty($user->paymentpoint_account_number)) {
+                                \Log::info("Login: Generating PaymentPoint account for " . $user->username);
+                                $this->paymentpoint_account($user->username);
+                            }
+                        } catch (\Exception $e) {
+                            \Log::error("Login PaymentPoint Error: " . $e->getMessage());
+                        }
 
                         $user = DB::table('user')->where(['id' => $user->id])->first();
                         $moniepoint_row = DB::table('user_bank')->where(['username' => $user->username, 'bank' => 'MONIEPOINT'])->first();
