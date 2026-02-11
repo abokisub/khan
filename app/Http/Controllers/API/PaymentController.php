@@ -19,6 +19,7 @@ class PaymentController extends Controller
 {
     public function Xixapay(Request $request)
     {
+        \Log::info('--- XIXAPAY WEBHOOK ENTRY POINT ---');
         // Retrieve the raw payload and headers for debugging
         $payload = $request->getContent();
         $xixapay_signature = $request->header('xixapay');
