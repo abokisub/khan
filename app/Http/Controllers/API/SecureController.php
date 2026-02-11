@@ -469,104 +469,28 @@ class SecureController extends Controller
     {
         if ($this->verifyOrigin($request)) {
             if (!empty($request->id)) {
-                $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifyapptoken($request->id)])->where(function ($query) {
-                    $query->where('type', 'ADMIN');
-                });
-                if ($check_user->count() > 0) {
+                $userId = $this->verifytoken($request->id);
+                $check_user = DB::table('user')->where(['status' => 1, 'id' => $userId, 'type' => 'ADMIN'])->first();
+                if ($check_user) {
                     // network vtu
-                    if ($request->monnify_atm == true || $request->monnify_atm == 1) {
-                        $monnify_atm = 1;
-                    } else {
-                        $monnify_atm = 0;
-                    }
-                    if ($request->monnify == true || $request->monnify == 1) {
-                        $monnify = 1;
-                    } else {
-                        $monnify = 0;
-                    }
-                    if ($request->referral == true || $request->referral == 1) {
-                        $referral = 1;
-                    } else {
-                        $referral = 0;
-                    }
-                    if ($request->bank_transfer == true || $request->bank_transfer == 1) {
-                        $bank_transfer = 1;
-                    } else {
-                        $bank_transfer = 0;
-                    }
-                    if ($request->paystack == true || $request->paystack == 1) {
-                        $paystack = 1;
-                    } else {
-                        $paystack = 0;
-                    }
-                    if ($request->is_verify_email == true || $request->is_verify_email == 1) {
-                        $is_verify_email = 1;
-                    } else {
-                        $is_verify_email = 0;
-                    }
-                    if ($request->is_feature == true || $request->is_feature == 1) {
-                        $is_feature = 1;
-                    } else {
-                        $is_feature = 0;
-                    }
-                    if ($request->wema == true || $request->wema == 1) {
-                        $wema = 1;
-                    } else {
-                        $wema = 0;
-                    }
-                    if ($request->kolomoni_mfb == true || $request->kolomoni_mfb == 1) {
-                        $kolomoni_mfb = 1;
-                    } else {
-                        $kolomoni_mfb = 0;
-                    }
-                    if ($request->fed == true || $request->fed == 1) {
-                        $fed = 1;
-                    } else {
-                        $fed = 0;
-                    }
-                    if ($request->str == true || $request->str == 1) {
-                        $str = 1;
-                    } else {
-                        $str = 0;
-                    }
-                    if ($request->bulksms == true || $request->bulksms == 1) {
-                        $bulksms = 1;
-                    } else {
-                        $bulksms = 0;
-                    }
-                    if ($request->allow_pin == true || $request->allow_pin == 1) {
-                        $allow_pin = 1;
-                    } else {
-                        $allow_pin = 0;
-                    }
-                    if ($request->bill == true || $request->bill == 1) {
-                        $bill_lock = 1;
-                    } else {
-                        $bill_lock = 0;
-                    }
-                    if ($request->allow_limit == true || $request->allow_limit == 1) {
-                        $allow_limit = 1;
-                    } else {
-                        $allow_limit = 0;
-                    }
-
-                    if ($request->stock == true || $request->stock == 1) {
-                        $stock = 1;
-                    } else {
-                        $stock = 0;
-                    }
-
-                    if ($request->card_ngn_lock == true || $request->card_ngn_lock == 1) {
-                        $card_ngn_lock = 1;
-                    } else {
-                        $card_ngn_lock = 0;
-                    }
-
-                    if ($request->card_usd_lock == true || $request->card_usd_lock == 1) {
-                        $card_usd_lock = 1;
-                    } else {
-                        $card_usd_lock = 0;
-                    }
+                    $monnify_atm = ($request->monnify_atm == true || $request->monnify_atm == 1) ? 1 : 0;
+                    $monnify = ($request->monnify == true || $request->monnify == 1) ? 1 : 0;
+                    $referral = ($request->referral == true || $request->referral == 1) ? 1 : 0;
+                    $bank_transfer = ($request->bank_transfer == true || $request->bank_transfer == 1) ? 1 : 0;
+                    $paystack = ($request->paystack == true || $request->paystack == 1) ? 1 : 0;
+                    $is_verify_email = ($request->is_verify_email == true || $request->is_verify_email == 1) ? 1 : 0;
+                    $is_feature = ($request->is_feature == true || $request->is_feature == 1) ? 1 : 0;
+                    $wema = ($request->wema == true || $request->wema == 1) ? 1 : 0;
+                    $kolomoni_mfb = ($request->kolomoni_mfb == true || $request->kolomoni_mfb == 1) ? 1 : 0;
+                    $fed = ($request->fed == true || $request->fed == 1) ? 1 : 0;
+                    $str = ($request->str == true || $request->str == 1) ? 1 : 0;
+                    $bulksms = ($request->bulksms == true || $request->bulksms == 1) ? 1 : 0;
+                    $allow_pin = ($request->allow_pin == true || $request->allow_pin == 1) ? 1 : 0;
+                    $bill_lock = ($request->bill == true || $request->bill == 1) ? 1 : 0;
+                    $allow_limit = ($request->allow_limit == true || $request->allow_limit == 1) ? 1 : 0;
+                    $stock = ($request->stock == true || $request->stock == 1) ? 1 : 0;
+                    $card_ngn_lock = ($request->card_ngn_lock == true || $request->card_ngn_lock == 1) ? 1 : 0;
+                    $card_usd_lock = ($request->card_usd_lock == true || $request->card_usd_lock == 1) ? 1 : 0;
 
                     $data = [
                         'monnify_atm' => $monnify_atm,
@@ -589,17 +513,12 @@ class SecureController extends Controller
                         'card_usd_lock' => $card_usd_lock,
                     ];
 
-                    if (DB::table('settings')->update($data)) {
-                        return response()->json([
-                            'status' => 'success',
-                            'message' => 'Updated'
-                        ]);
-                    } else {
-                        return response()->json([
-                            'status' => 403,
-                            'messgae' => 'Unable to update'
-                        ])->setStatusCode(403);
-                    }
+                    DB::table('settings')->update($data);
+
+                    return response()->json([
+                        'status' => 'success',
+                        'message' => 'Updated'
+                    ]);
                 } else {
                     return response()->json([
                         'status' => 403,
