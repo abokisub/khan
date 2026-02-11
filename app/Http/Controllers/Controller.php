@@ -537,7 +537,7 @@ class Controller extends BaseController
             $full_name = isset($user->name) && $user->name ? $user->name : $user->username;
             $name_parts = preg_split('/\s+/', trim($full_name));
             $first_name = $name_parts[0];
-            $last_name = count($name_parts) > 1 ? $name_parts[count($name_parts) - 1] : $name_parts[0];
+            $last_name = count($name_parts) > 1 ? $name_parts[count($name_parts) - 1] : 'User'; // Use 'User' as fallback for single names
 
             // Step 1.5: Validate customer only if BVN is available
             $bvn_to_use = !empty($user->bvn) ? $user->bvn : ($habukhan_key->psk_bvn ?? $habukhan_key->mon_bvn);
@@ -556,6 +556,8 @@ class Controller extends BaseController
 
             // Step 2: Create dedicated account
             $phone = $user->phone;
+
+            // Try Wema Bank first
             $accountPayload = [
                 'customer' => $customer_code,
                 'preferred_bank' => 'wema-bank',
@@ -563,9 +565,21 @@ class Controller extends BaseController
                 'last_name' => $last_name,
                 'phone' => $phone,
             ];
-            $accountResponse = Http::timeout(10)->withOptions(['connect_timeout' => 5])->withToken($paystack_secret)
+
+            $accountResponse = Http::timeout(15)->withOptions(['connect_timeout' => 5])->withToken($paystack_secret)
                 ->post('https://api.paystack.co/dedicated_account', $accountPayload);
-            \Log::info('Paystack: Dedicated Account API Status: ' . $accountResponse->status() . ' Response: ' . json_encode($accountResponse->json()));
+
+            \Log::info('Paystack: Dedicated Account (Wema) API Status: ' . $accountResponse->status() . ' Response: ' . json_encode($accountResponse->json()));
+
+            // If Wema fails, try Titan Paystack
+            if (!$accountResponse->successful()) {
+                \Log::info('Paystack: Wema failed, retrying with titan-paystack for ' . $username);
+                $accountPayload['preferred_bank'] = 'titan-paystack';
+                $accountResponse = Http::timeout(15)->withOptions(['connect_timeout' => 5])->withToken($paystack_secret)
+                    ->post('https://api.paystack.co/dedicated_account', $accountPayload);
+                \Log::info('Paystack: Dedicated Account (Titan) API Status: ' . $accountResponse->status() . ' Response: ' . json_encode($accountResponse->json()));
+            }
+
             if ($accountResponse->successful() && isset($accountResponse['data']['account_number'])) {
                 $acc = $accountResponse['data'];
                 \Log::info('Paystack SYNC SUCCESS for ' . $username . ': ' . $acc['account_number']);
