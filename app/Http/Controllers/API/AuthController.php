@@ -358,8 +358,12 @@ class AuthController extends Controller
                     }
 
                     try {
-                        if ($paymentpoint_enabled && $user->paymentpoint_account_number == null)
+                        if ($paymentpoint_enabled && $user->paymentpoint_account_number == null) {
+                            \Log::info("Login: PaymentPoint enabled and user account missing. Triggering creation for " . $user->username);
                             $this->paymentpoint_account($user->username);
+                        } else {
+                            \Log::info("Login: PaymentPoint skip. Enabled: " . ($paymentpoint_enabled ? 'YES' : 'NO') . ", Account: " . ($user->paymentpoint_account_number ?? 'NULL'));
+                        }
                     } catch (\Exception $e) {
                         \Log::error("Account PaymentPoint: " . $e->getMessage());
                     }
