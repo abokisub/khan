@@ -830,11 +830,11 @@ class AppController extends Controller
                                 $profile_image[] = ['username' => $habukhan->username, 'id' => $habukhan->id, 'message' => $habukhan->message, 'date' => $habukhan->date, 'profile_image' => $habukhan->username, 'status' => $habukhan->habukhan];
                             }
                         }
-                        return response()->json([
-                            'status' => 'success',
-                            'notif' => $profile_image
-                        ]);
                     }
+                    return response()->json([
+                        'status' => 'success',
+                        'notif' => $profile_image
+                    ]);
                 } else {
                     return response()->json([
                         'status' => 403,
