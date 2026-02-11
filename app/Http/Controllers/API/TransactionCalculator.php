@@ -1094,8 +1094,7 @@ class TransactionCalculator extends Controller
 
                         $transactions = $query->orderBy('habukhan_date', 'desc')->paginate(50);
 
-                        // Map to cleaner format
-                        $mapped = $transactions->getCollection()->map(function ($tx) {
+                        $transactions->through(function ($tx) {
                             $cat = 'Others';
                             $icon = 'more_horiz';
                             $color = '0xFF6B7280';
@@ -1153,7 +1152,7 @@ class TransactionCalculator extends Controller
 
                         return response()->json([
                             'status' => 'success',
-                            'data' => $mapped,
+                            'data' => $transactions->items(),
                             'current_page' => $transactions->currentPage(),
                             'last_page' => $transactions->lastPage()
                         ]);

@@ -323,5 +323,4 @@ class ExamPurchase extends Controller
             ])->setStatusCode(403);
         }
     }
-}   }
 }
