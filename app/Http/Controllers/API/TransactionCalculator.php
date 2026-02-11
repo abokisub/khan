@@ -1094,7 +1094,7 @@ class TransactionCalculator extends Controller
 
                         $transactions = $query->orderBy('habukhan_date', 'desc')->paginate(50);
 
-                        $transactions->through(function ($tx) {
+                        $transactions->getCollection()->transform(function ($tx) {
                             $cat = 'Others';
                             $icon = 'more_horiz';
                             $color = '0xFF6B7280';

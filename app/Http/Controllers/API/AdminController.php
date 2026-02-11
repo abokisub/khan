@@ -2640,13 +2640,14 @@ class AdminController extends Controller
 
                     $users = $query->select('id', 'name', 'username', 'email', 'pin', 'phone', 'bal', 'refbal', 'kyc', 'status', 'type', 'profile_image', 'date')
                         ->orderBy('id', 'desc')
-                        ->paginate($request->input('habukhan', 15))
-                        ->through(function ($u) {
-                            // Cast status and kyc to integers for frontend compatibility (Fixes "Unknown" status display)
-                            $u->status = (int) $u->status;
-                            $u->kyc = (int) $u->kyc;
-                            return $u;
-                        });
+                        ->paginate($request->input('habukhan', 15));
+
+                    $users->getCollection()->transform(function ($u) {
+                        // Cast status and kyc to integers for frontend compatibility (Fixes "Unknown" status display)
+                        $u->status = (int) $u->status;
+                        $u->kyc = (int) $u->kyc;
+                        return $u;
+                    });
 
                     return response()->json(['all_users' => $users]);
                 } else {

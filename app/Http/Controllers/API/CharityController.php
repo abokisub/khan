@@ -254,12 +254,12 @@ class CharityController extends Controller
             ->join('charities', 'campaigns.charity_id', '=', 'charities.id')
             ->where('campaigns.status', 'active') // Default to active only for feed
             ->select(
-            'campaigns.*',
-            'charities.name as charity_name',
-            'charities.username as charity_username',
-            'charities.logo',
-            'charities.verification_status'
-        );
+                'campaigns.*',
+                'charities.name as charity_name',
+                'charities.username as charity_username',
+                'charities.logo',
+                'charities.verification_status'
+            );
 
         if ($request->status) {
             // Override default if specific status requested
@@ -284,13 +284,13 @@ class CharityController extends Controller
 
         if ($request->has('random') && $request->random == 'true') {
             $query->inRandomOrder();
-        }
-        else {
+        } else {
             $query->orderBy('campaigns.id', 'desc');
         }
 
-        $campaigns = $query->paginate($request->limit ?? 10)
-            ->through(function ($campaign) {
+        $campaigns = $query->paginate($request->limit ?? 10);
+
+        $campaigns->getCollection()->transform(function ($campaign) {
             $campaign->logo_url = $campaign->logo ? url($campaign->logo) : null;
             $campaign->image_url = $campaign->image ? url($campaign->image) : null;
             // Calculate percentage
@@ -352,8 +352,9 @@ class CharityController extends Controller
             $query->where('name', 'LIKE', '%' . $request->search . '%')
                 ->orWhere('username', 'LIKE', '%' . $request->search . '%');
         }
-        $charities = $query->orderBy('id', 'desc')->paginate($request->limit ?? 10)
-            ->through(function ($charity) {
+        $charities = $query->orderBy('id', 'desc')->paginate($request->limit ?? 10);
+
+        $charities->getCollection()->transform(function ($charity) {
             $charity->logo_url = $charity->logo ? url($charity->logo) : null;
             return $charity;
         });
@@ -406,8 +407,9 @@ class CharityController extends Controller
 
             $donations = $query->select('donations.*', 'campaigns.title as campaign_title')
                 ->orderBy('donations.id', 'desc')
-                ->paginate($request->limit ?? 10)
-                ->through(function ($donation) {
+                ->paginate($request->limit ?? 10);
+
+            $donations->getCollection()->transform(function ($donation) {
                 $donation->date_formatted = Carbon::parse($donation->created_at)->format('d M Y, h:i A');
                 return $donation;
             });
@@ -502,8 +504,7 @@ class CharityController extends Controller
                 // If specific ID is provided, we can force payout even if active (incomplete)
                 if ($request->has('campaign_id')) {
                     $query->where('id', $request->campaign_id);
-                }
-                else {
+                } else {
                     // Bulk Mode: Only closed campaigns for safety
                     $query->where('status', 'closed');
                 }
@@ -556,8 +557,7 @@ class CharityController extends Controller
 
                         DB::commit();
                         $count++;
-                    }
-                    catch (\Exception $e) {
+                    } catch (\Exception $e) {
                         DB::rollBack();
                     }
                 }
