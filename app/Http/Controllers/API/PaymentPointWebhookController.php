@@ -39,8 +39,9 @@ class PaymentPointWebhookController extends Controller
                 'payload_length' => strlen($payload)
             ]);
 
-            // Verify signature
-            if (!$this->paymentPointService->verifyWebhookSignature($payload, (string) $signature)) {
+            // Verify signature and identify provider
+            $provider = $this->paymentPointService->verifyWebhookSignature($payload, (string) $signature);
+            if (!$provider) {
                 Log::warning('PaymentPoint webhook signature verification failed', [
                     'signature_received' => $signature,
                     'is_null' => is_null($signature),
@@ -63,7 +64,8 @@ class PaymentPointWebhookController extends Controller
             $transactionStatus = $data['transaction_status'] ?? null;
 
             if ($notificationStatus === 'payment_successful' && $transactionStatus === 'success') {
-                $this->processPayment($data);
+                // Process individual transaction
+                $this->processPayment($data, $provider);
             } else {
                 Log::info('PaymentPoint webhook: Skipping non-successful notification', [
                     'notification_status' => $notificationStatus,
@@ -86,9 +88,10 @@ class PaymentPointWebhookController extends Controller
      * Process successful payment
      *
      * @param array $data
+     * @param string $provider
      * @return void
      */
-    private function processPayment($data)
+    private function processPayment($data, $provider = 'paymentpoint')
     {
         try {
             $accountNumber = $data['receiver']['account_number'] ?? null;
@@ -119,8 +122,14 @@ class PaymentPointWebhookController extends Controller
                 return;
             }
 
-            // Get PaymentPoint charge from settings
-            $charge = $this->core()->paymentpoint_charge ?? 0;
+            // Get charge based on identified provider
+            if ($provider === 'xixapay') {
+                $charge = $this->core()->xixapay_charge ?? 26;
+                $creditBy = 'Xixapay Automated Bank Transfer';
+            } else {
+                $charge = $this->core()->paymentpoint_charge ?? 35;
+                $creditBy = 'PaymentPoint Automated Bank Transfer';
+            }
 
             // Calculate final amount after charge
             $finalAmount = $settlementAmount - $charge;
@@ -150,7 +159,7 @@ class PaymentPointWebhookController extends Controller
                 'newbal' => $newBalance,
                 'wallet_type' => 'User Wallet',
                 'type' => 'Automated Bank Transfer',
-                'credit_by' => 'PaymentPoint Automated Bank Transfer',
+                'credit_by' => $creditBy,
                 'date' => $this->system_date(),
                 'status' => 1,
                 'transid' => $transactionId,
@@ -169,7 +178,7 @@ class PaymentPointWebhookController extends Controller
             DB::table('message')->insert([
                 'username' => $user->username,
                 'amount' => $finalAmount,
-                'message' => 'Account Credited By PaymentPoint Automated Bank Transfer ₦' . number_format($finalAmount, 2),
+                'message' => 'Account Credited By ' . ($provider === 'xixapay' ? 'Xixapay' : 'PaymentPoint') . ' Automated Bank Transfer ₦' . number_format($finalAmount, 2),
                 'oldbal' => $oldBalance,
                 'newbal' => $newBalance,
                 'habukhan_date' => $this->system_date(),

@@ -32,24 +32,14 @@ class PaymentController extends Controller
             'payload_sample' => substr($payload, 0, 100) . '...'
         ]);
 
-        // Define the secret key from config (Fix for env() null in production)
-        $secret = config('services.xixapay.secret_key');
+        // Verify signature and identify provider using standardized service
+        $paymentPointService = new \App\Services\PaymentPointService();
+        $provider = $paymentPointService->verifyWebhookSignature($payload, (string) $xixapay_signature);
 
-        if (empty($secret)) {
-            \Log::error('Xixapay Webhook: Secret key is missing in config!');
-            return response()->json('Configuration error', 500);
-        }
-
-        // Compute the hash key using the payload and secret key
-        $hashkey = hash_hmac('sha256', $payload, $secret);
-
-        // Compare the computed hash key with the received signature securely
-        if (!hash_equals($hashkey, (string) $xixapay_signature)) {
+        if (!$provider) {
             \Log::warning('Xixapay Webhook: Signature verification failed', [
                 'received' => $xixapay_signature,
-                'computed' => $hashkey
             ]);
-            // Return 401 but log it, allows testing if user overrides
             // return response()->json('Verification failed', 401);
         }
 
@@ -96,8 +86,15 @@ class PaymentController extends Controller
             return response()->json('Unable to find user', 403);
         }
 
-        // Compute charges and credit amount from dynamic settings
-        $charges = $this->core()->xixapay_charge ?? 60;
+        // Compute charges and credit amount based on identified provider
+        if ($provider === 'paymentpoint') {
+            $charges = $this->core()->paymentpoint_charge ?? 35;
+            $creditBy = 'PaymentPoint Automated Bank Transfer';
+        } else {
+            // Default to Xixapay if verified as such or if verification failed (for legacy/debug)
+            $charges = $this->core()->xixapay_charge ?? 26;
+            $creditBy = 'Xixapay Automated Bank Transfer';
+        }
 
         $credit = $amount_paid - $charges;
 
@@ -112,7 +109,7 @@ class PaymentController extends Controller
             'newbal' => $user->bal + $credit,
             'wallet_type' => 'User Wallet',
             'type' => 'Automated Bank Transfer',
-            'credit_by' => 'Palmpay Automated Bank Transfer',
+            'credit_by' => $creditBy,
             'date' => $this->system_date(),
             'status' => 1,
             'transid' => $transid,
@@ -129,7 +126,7 @@ class PaymentController extends Controller
         DB::table('message')->insert([
             'username' => $user->username,
             'amount' => $credit,
-            'message' => 'Account Credited By Automated Bank Transfer ₦' . number_format($credit, 2),
+            'message' => 'Account Credited By ' . ($provider === 'paymentpoint' ? 'PaymentPoint' : 'Xixapay') . ' Automated Bank Transfer ₦' . number_format($credit, 2),
             'oldbal' => $user->bal,
             'newbal' => $user->bal + $credit,
             'habukhan_date' => $this->system_date(),

@@ -116,18 +116,19 @@ class PaymentPointService
      *
      * @param string $payload
      * @param string $signature
-     * @return bool
+     * @return string|bool
      */
     public function verifyWebhookSignature($payload, $signature)
     {
-        if (!$signature) return false;
+        if (!$signature)
+            return false;
 
         // Try PaymentPoint Secret first
         $ppSecret = str_replace('Bearer ', '', trim($this->apiSecret));
         $calculatedPPSignature = hash_hmac('sha256', $payload, $ppSecret);
-        
+
         if (hash_equals($calculatedPPSignature, (string) $signature)) {
-            return true;
+            return 'paymentpoint';
         }
 
         // Fallback: Try Xixapay Secret (as they might use the same backend)
@@ -136,7 +137,7 @@ class PaymentPointService
             $calculatedXixaSignature = hash_hmac('sha256', $payload, $xixapaySecret);
             if (hash_equals($calculatedXixaSignature, (string) $signature)) {
                 Log::info('Webhook verified using Xixapay secret fallback');
-                return true;
+                return 'xixapay';
             }
         }
 
