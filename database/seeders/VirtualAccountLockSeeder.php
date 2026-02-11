@@ -18,7 +18,7 @@ class VirtualAccountLockSeeder extends Seeder
             ['provider' => 'xixapay', 'account_type' => 'palmpay', 'is_locked' => false, 'sort_order' => 1],
             ['provider' => 'paymentpoint', 'account_type' => 'palmpay', 'is_locked' => false, 'sort_order' => 2],
             ['provider' => 'paystack', 'account_type' => 'wema', 'is_locked' => false, 'sort_order' => 3],
-            ['provider' => 'monnify', 'account_type' => 'monniepoint', 'is_locked' => false, 'sort_order' => 4],
+            ['provider' => 'monnify', 'account_type' => 'moniepoint', 'is_locked' => false, 'sort_order' => 4],
             ['provider' => 'xixapay', 'account_type' => 'kolomonie', 'is_locked' => false, 'sort_order' => 5],
         ];
 

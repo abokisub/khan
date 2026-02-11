@@ -90,7 +90,7 @@ class Banks extends Controller
                     }
 
                     // 4. Monnify (Moniepoint)
-                    if ($lock->provider === 'monnify' && $lock->account_type === 'monniepoint') { // Note spelling 'monniepoint' in locks logic
+                    if ($lock->provider === 'monnify' && $lock->account_type === 'moniepoint') {
                         $moniepoint = DB::table('user_bank')
                             ->where('username', $auth_user->username)
                             ->where('bank', 'MONIEPOINT')
