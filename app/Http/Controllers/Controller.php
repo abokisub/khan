@@ -521,7 +521,7 @@ class Controller extends BaseController
                 'first_name' => $user->username,
                 'phone' => $user->phone,
             ];
-            $customerResponse = Http::timeout(10)->withOptions(['connect_timeout' => 5])->withToken($paystack_secret)
+            $customerResponse = Http::timeout(15)->withOptions(['connect_timeout' => 10])->withToken($paystack_secret)
                 ->post('https://api.paystack.co/customer', $customerPayload);
             \Log::info('Paystack: Customer API response for user ' . $username . ': ' . json_encode($customerResponse->json()));
             if ($customerResponse->successful() && isset($customerResponse['data']['customer_code'])) {
@@ -549,7 +549,7 @@ class Controller extends BaseController
                     'first_name' => $first_name,
                     'last_name' => $last_name,
                 ];
-                $validateResponse = Http::timeout(10)->withOptions(['connect_timeout' => 5])->withToken($paystack_secret)
+                $validateResponse = Http::timeout(15)->withOptions(['connect_timeout' => 10])->withToken($paystack_secret)
                     ->post("https://api.paystack.co/customer/{$customer_code}/identification", $validatePayload);
                 \Log::info("Paystack: Customer Validation Status for {$username}: " . $validateResponse->status() . " Response: " . $validateResponse->body());
             }
@@ -557,27 +557,41 @@ class Controller extends BaseController
             // Step 2: Create dedicated account
             $phone = $user->phone;
 
-            // Try Wema Bank first
+            // NEW: Diagnostic check - what providers are actually available?
+            $providersResponse = Http::timeout(10)->withToken($paystack_secret)
+                ->get('https://api.paystack.co/dedicated_account/available_providers');
+            \Log::info('Paystack: Available DVA Providers: ' . $providersResponse->body());
+
+            // Try Titan Paystack first as requested
             $accountPayload = [
                 'customer' => $customer_code,
-                'preferred_bank' => 'wema-bank',
+                'preferred_bank' => 'titan-paystack',
                 'first_name' => $first_name,
                 'last_name' => $last_name,
                 'phone' => $phone,
             ];
 
-            $accountResponse = Http::timeout(15)->withOptions(['connect_timeout' => 5])->withToken($paystack_secret)
+            $accountResponse = Http::timeout(20)->withOptions(['connect_timeout' => 10])->withToken($paystack_secret)
                 ->post('https://api.paystack.co/dedicated_account', $accountPayload);
 
-            \Log::info('Paystack: Dedicated Account (Wema) API Status: ' . $accountResponse->status() . ' Response: ' . json_encode($accountResponse->json()));
+            \Log::info('Paystack: Dedicated Account (Titan) API Status: ' . $accountResponse->status() . ' Response: ' . json_encode($accountResponse->json()));
 
-            // If Wema fails, try Titan Paystack
+            // If Titan fails, try Wema Bank
             if (!$accountResponse->successful()) {
-                \Log::info('Paystack: Wema failed, retrying with titan-paystack for ' . $username);
-                $accountPayload['preferred_bank'] = 'titan-paystack';
-                $accountResponse = Http::timeout(15)->withOptions(['connect_timeout' => 5])->withToken($paystack_secret)
+                \Log::info('Paystack: Titan failed, retrying with wema-bank for ' . $username);
+                $accountPayload['preferred_bank'] = 'wema-bank';
+                $accountResponse = Http::timeout(20)->withOptions(['connect_timeout' => 10])->withToken($paystack_secret)
                     ->post('https://api.paystack.co/dedicated_account', $accountPayload);
-                \Log::info('Paystack: Dedicated Account (Titan) API Status: ' . $accountResponse->status() . ' Response: ' . json_encode($accountResponse->json()));
+                \Log::info('Paystack: Dedicated Account (Wema) API Status: ' . $accountResponse->status() . ' Response: ' . json_encode($accountResponse->json()));
+            }
+
+            // If Wema also fails, try WITHOUT a preferred bank to see what happens
+            if (!$accountResponse->successful()) {
+                \Log::info('Paystack: Wema failed, retrying WITHOUT preferred_bank for ' . $username);
+                unset($accountPayload['preferred_bank']);
+                $accountResponse = Http::timeout(20)->withOptions(['connect_timeout' => 10])->withToken($paystack_secret)
+                    ->post('https://api.paystack.co/dedicated_account', $accountPayload);
+                \Log::info('Paystack: Dedicated Account (Auto) API Status: ' . $accountResponse->status() . ' Response: ' . json_encode($accountResponse->json()));
             }
 
             if ($accountResponse->successful() && isset($accountResponse['data']['account_number'])) {
