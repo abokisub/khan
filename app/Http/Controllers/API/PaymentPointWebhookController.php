@@ -28,14 +28,22 @@ class PaymentPointWebhookController extends Controller
         try {
             // Get raw payload
             $payload = $request->getContent();
-            $signature = $request->header('Paymentpoint-Signature');
+            $signature = $request->header('Paymentpoint-Signature') ?:
+                $request->header('xixapay') ?:
+                $request->header('x-xixapay-signature');
 
-            Log::info('PaymentPoint Webhook Headers', $request->headers->all());
+            Log::info('PaymentPoint Webhook Debug', [
+                'headers' => $request->headers->all(),
+                'signature_found' => !empty($signature),
+                'signature_header_used' => $request->header('Paymentpoint-Signature') ? 'Paymentpoint-Signature' : ($request->header('xixapay') ? 'xixapay' : ($request->header('x-xixapay-signature') ? 'x-xixapay-signature' : 'none')),
+                'payload_length' => strlen($payload)
+            ]);
 
             // Verify signature
-            if (!$this->paymentPointService->verifyWebhookSignature($payload, $signature)) {
+            if (!$this->paymentPointService->verifyWebhookSignature($payload, (string) $signature)) {
                 Log::warning('PaymentPoint webhook signature verification failed', [
-                    'signature' => $signature,
+                    'signature_received' => $signature,
+                    'is_null' => is_null($signature),
                 ]);
                 return response()->json(['error' => 'Invalid signature'], 401);
             }
@@ -123,7 +131,7 @@ class PaymentPointWebhookController extends Controller
             }
 
             // Get old balance
-            $oldBalance = $user->bal;
+            $oldBalance = floatval($user->bal);
             $newBalance = $oldBalance + $finalAmount;
 
             // Update user balance
@@ -131,22 +139,41 @@ class PaymentPointWebhookController extends Controller
                 ->where('id', $user->id)
                 ->update(['bal' => $newBalance]);
 
-            // Record deposit transaction
+            // Record deposit transaction (Align with app schema)
             DB::table('deposit')->insert([
                 'username' => $user->username,
                 'amount' => $amountPaid,
                 'oldbal' => $oldBalance,
                 'newbal' => $newBalance,
-                'charges' => $charge + $settlementFee,
-                'payment_method' => 'PaymentPoint',
-                'reference' => $transactionId,
-                'transid' => $transactionId,
-                'wallet_type' => 'main',
-                'type' => 'credit',
+                'wallet_type' => 'User Wallet',
+                'type' => 'Automated Bank Transfer',
+                'credit_by' => 'PaymentPoint Automated Bank Transfer',
+                'date' => $this->system_date(),
                 'status' => 1,
-                'date' => now(),
-                'created_at' => now(),
-                'updated_at' => now(),
+                'transid' => $transactionId,
+                'charges' => $charge + $settlementFee,
+                'monify_ref' => $transactionId
+            ]);
+
+            // Send Notifications
+            try {
+                (new \App\Services\NotificationService())->sendExternalCreditNotification($user, $finalAmount, $transactionId);
+            } catch (\Exception $e) {
+                Log::warning('PaymentPoint webhook: Notification failed', ['error' => $e->getMessage()]);
+            }
+
+            // Record Message
+            DB::table('message')->insert([
+                'username' => $user->username,
+                'amount' => $finalAmount,
+                'message' => 'Account Credited By PaymentPoint Automated Bank Transfer ₦' . number_format($finalAmount, 2),
+                'oldbal' => $oldBalance,
+                'newbal' => $newBalance,
+                'habukhan_date' => $this->system_date(),
+                'plan_status' => 1,
+                'transid' => $transactionId,
+                'phone_account' => 'Automated Funding',
+                'role' => 'credit'
             ]);
 
             Log::info('PaymentPoint payment processed successfully', [

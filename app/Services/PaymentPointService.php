@@ -120,11 +120,26 @@ class PaymentPointService
      */
     public function verifyWebhookSignature($payload, $signature)
     {
-        // Extract the secret key from the Bearer token (remove "Bearer " prefix)
-        $secretKey = str_replace('Bearer ', '', $this->apiSecret);
+        if (!$signature) return false;
 
-        $calculatedSignature = hash_hmac('sha256', $payload, $secretKey);
+        // Try PaymentPoint Secret first
+        $ppSecret = str_replace('Bearer ', '', trim($this->apiSecret));
+        $calculatedPPSignature = hash_hmac('sha256', $payload, $ppSecret);
+        
+        if (hash_equals($calculatedPPSignature, (string) $signature)) {
+            return true;
+        }
 
-        return hash_equals($calculatedSignature, (string) $signature);
+        // Fallback: Try Xixapay Secret (as they might use the same backend)
+        $xixapaySecret = trim(config('services.xixapay.secret_key'));
+        if (!empty($xixapaySecret)) {
+            $calculatedXixaSignature = hash_hmac('sha256', $payload, $xixapaySecret);
+            if (hash_equals($calculatedXixaSignature, (string) $signature)) {
+                Log::info('Webhook verified using Xixapay secret fallback');
+                return true;
+            }
+        }
+
+        return false;
     }
 }
