@@ -2615,52 +2615,40 @@ class AdminController extends Controller
                     $query->where('type', 'ADMIN');
                 });
                 if ($check_user->count() > 0) {
-                    $search = strtolower($request->search);
-                    if ($request->role == 'ALL' && $request->status == 'ALL' && empty($search)) {
-                        return response()->json([
-                            'all_users' => DB::table('user')->select('id', 'name', 'username', 'email', 'pin', 'phone', 'bal', 'refbal', 'kyc', 'status', 'type', 'profile_image', 'date')->orderBy('id', 'desc')->paginate($request->input('habukhan', 15)),
-                        ]);
-                    } else if ($request->role != 'ALL' && $request->status == 'ALL' && empty($search)) {
-                        return response()->json([
-                            'all_users' => DB::table('user')->where(['type' => $request->role])->select('id', 'name', 'username', 'email', 'pin', 'phone', 'bal', 'refbal', 'kyc', 'status', 'type', 'profile_image', 'date')->orderBy('id', 'desc')->paginate($request->input('habukhan', 15)),
-                        ]);
-                    } else if ($request->role == 'ALL' && $request->status != 'ALL' && empty($search)) {
-                        return response()->json([
-                            'all_users' => DB::table('user')->where(['status' => $request->status])->select('id', 'name', 'username', 'email', 'pin', 'phone', 'bal', 'refbal', 'kyc', 'status', 'type', 'profile_image', 'date')->orderBy('id', 'desc')->paginate($request->input('habukhan', 15)),
-                        ]);
-                    } else if ($request->role != 'ALL' && $request->status != 'ALL' && empty($search)) {
-                        return response()->json([
-                            'all_users' => DB::table('user')->where(['status' => $request->status, 'type' => $request->role])->select('id', 'name', 'username', 'email', 'pin', 'phone', 'bal', 'refbal', 'kyc', 'status', 'type', 'profile_image', 'date')->orderBy('id', 'desc')->paginate($request->input('habukhan', 15)),
-                        ]);
-                    } else if ($request->role == 'ALL' && $request->status == 'ALL' && !empty($search)) {
-                        return response()->json([
-                            'all_users' => DB::table('user')->where(function ($query) use ($search) {
-                                $query->orWhere('username', 'LIKE', "%$search%")->orWhere('name', 'LIKE', "%$search%")->orWhere('email', 'LIKE', "%$search%")->orWhere('date', 'LIKE', "%$search%")->orWhere('phone', 'LIKE', "%$search%")->orWhere('pin', 'LIKE', "%$search%")->orWhere('type', 'LIKE', "%$search%");
-                            })->select('id', 'name', 'username', 'email', 'pin', 'phone', 'bal', 'refbal', 'kyc', 'status', 'type', 'profile_image', 'date')->orderBy('id', 'desc')->paginate($request->input('habukhan', 15)),
-                        ]);
-                    } else if ($request->role != 'ALL' && $request->status == 'ALL' && !empty($search)) {
-                        return response()->json([
-                            'all_users' => DB::table('user')->where(['type' => $request->role])->where(function ($query) use ($search) {
-                                $query->orWhere('username', 'LIKE', "%$search%")->orWhere('name', 'LIKE', "%$search%")->orWhere('email', 'LIKE', "%$search%")->orWhere('date', 'LIKE', "%$search%")->orWhere('phone', 'LIKE', "%$search%")->orWhere('pin', 'LIKE', "%$search%")->orWhere('type', 'LIKE', "%$search%");
-                            })->select('id', 'name', 'username', 'email', 'pin', 'phone', 'bal', 'refbal', 'kyc', 'status', 'type', 'profile_image', 'date')->orderBy('id', 'desc')->paginate($request->input('habukhan', 15)),
-                        ]);
-                    } else if ($request->role == 'ALL' && $request->status != 'ALL' && !empty($search)) {
-                        return response()->json([
-                            'all_users' => DB::table('user')->where(['status' => $request->status])->where(function ($query) use ($search) {
-                                $query->orWhere('username', 'LIKE', "%$search%")->orWhere('name', 'LIKE', "%$search%")->orWhere('email', 'LIKE', "%$search%")->orWhere('date', 'LIKE', "%$search%")->orWhere('phone', 'LIKE', "%$search%")->orWhere('pin', 'LIKE', "%$search%")->orWhere('type', 'LIKE', "%$search%");
-                            })->select('id', 'name', 'username', 'email', 'pin', 'phone', 'bal', 'refbal', 'kyc', 'status', 'type', 'profile_image', 'date')->orderBy('id', 'desc')->paginate($request->input('habukhan', 15)),
-                        ]);
-                    } else if ($request->role != 'ALL' && $request->status != 'ALL' && !empty($search)) {
-                        return response()->json([
-                            'all_users' => DB::table('user')->where(['status' => $request->status, 'type' => $request->role])->where(function ($query) use ($search) {
-                                $query->orWhere('username', 'LIKE', "%$search%")->orWhere('name', 'LIKE', "%$search%")->orWhere('email', 'LIKE', "%$search%")->orWhere('date', 'LIKE', "%$search%")->orWhere('phone', 'LIKE', "%$search%")->orWhere('pin', 'LIKE', "%$search%")->orWhere('type', 'LIKE', "%$search%");
-                            })->select('id', 'name', 'username', 'email', 'pin', 'phone', 'bal', 'refbal', 'kyc', 'status', 'type', 'profile_image', 'date')->orderBy('id', 'desc')->paginate($request->input('habukhan', 15)),
-                        ]);
-                    } else {
-                        return response()->json([
-                            'all_users' => DB::table('user')->select('id', 'name', 'username', 'email', 'pin', 'phone', 'bal', 'refbal', 'kyc', 'status', 'type', 'profile_image', 'date')->orderBy('id', 'desc')->paginate($request->input('habukhan', 15)),
-                        ]);
+                    $query = DB::table('user');
+
+                    if ($request->role != 'ALL') {
+                        $query->where('type', $request->role);
                     }
+
+                    if ($request->status != 'ALL') {
+                        $query->where('status', $request->status);
+                    }
+
+                    if (!empty($request->search)) {
+                        $search = strtolower($request->search);
+                        $query->where(function ($q) use ($search) {
+                            $q->orWhere('username', 'LIKE', "%$search%")
+                                ->orWhere('name', 'LIKE', "%$search%")
+                                ->orWhere('email', 'LIKE', "%$search%")
+                                ->orWhere('date', 'LIKE', "%$search%")
+                                ->orWhere('phone', 'LIKE', "%$search%")
+                                ->orWhere('pin', 'LIKE', "%$search%")
+                                ->orWhere('type', 'LIKE', "%$search%");
+                        });
+                    }
+
+                    $users = $query->select('id', 'name', 'username', 'email', 'pin', 'phone', 'bal', 'refbal', 'kyc', 'status', 'type', 'profile_image', 'date')
+                        ->orderBy('id', 'desc')
+                        ->paginate($request->input('habukhan', 15))
+                        ->through(function ($u) {
+                            // Cast status and kyc to integers for frontend compatibility (Fixes "Unknown" status display)
+                            $u->status = (int) $u->status;
+                            $u->kyc = (int) $u->kyc;
+                            return $u;
+                        });
+
+                    return response()->json(['all_users' => $users]);
                 } else {
                     return response()->json([
                         'status' => 403,
