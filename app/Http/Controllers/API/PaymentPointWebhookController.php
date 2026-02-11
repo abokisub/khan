@@ -51,8 +51,16 @@ class PaymentPointWebhookController extends Controller
             Log::info('PaymentPoint webhook received', $data);
 
             // Process payment if successful
-            if ($data['notification_status'] === 'payment_successful' && $data['transaction_status'] === 'success') {
+            $notificationStatus = $data['notification_status'] ?? null;
+            $transactionStatus = $data['transaction_status'] ?? null;
+
+            if ($notificationStatus === 'payment_successful' && $transactionStatus === 'success') {
                 $this->processPayment($data);
+            } else {
+                Log::info('PaymentPoint webhook: Skipping non-successful notification', [
+                    'notification_status' => $notificationStatus,
+                    'transaction_status' => $transactionStatus
+                ]);
             }
 
             return response()->json(['status' => 'success'], 200);
@@ -75,12 +83,17 @@ class PaymentPointWebhookController extends Controller
     private function processPayment($data)
     {
         try {
-            $accountNumber = $data['receiver']['account_number'];
-            $amountPaid = $data['amount_paid'];
-            $settlementAmount = $data['settlement_amount'];
-            $settlementFee = $data['settlement_fee'];
-            $transactionId = $data['transaction_id'];
+            $accountNumber = $data['receiver']['account_number'] ?? null;
+            $amountPaid = floatval($data['amount_paid'] ?? 0);
+            $settlementAmount = floatval($data['settlement_amount'] ?? 0);
+            $settlementFee = floatval($data['settlement_fee'] ?? 0);
+            $transactionId = $data['transaction_id'] ?? null;
             $customerEmail = $data['customer']['email'] ?? null;
+
+            if (!$accountNumber && !$customerEmail) {
+                Log::warning('PaymentPoint webhook: Missing receiver account or customer email');
+                return;
+            }
 
             // Find user by PaymentPoint account number OR email (fallback)
             $user = DB::table('user')
@@ -96,9 +109,7 @@ class PaymentPointWebhookController extends Controller
             }
 
             // Get PaymentPoint charge from settings
-            $charge = DB::table('card_settings')
-                ->where('name', 'paymentpoint_charge')
-                ->value('amount') ?? 0;
+            $charge = $this->core()->paymentpoint_charge ?? 0;
 
             // Calculate final amount after charge
             $finalAmount = $settlementAmount - $charge;

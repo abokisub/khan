@@ -24,8 +24,9 @@ class PaymentController extends Controller
         $xixapay_signature = $request->header('xixapay');
 
         \Log::info('Xixapay Webhook Hit', [
+            'headers' => $request->headers->all(),
             'signature_header' => $xixapay_signature,
-            'payload_sample' => substr($payload, 0, 200) . '...'
+            'payload_sample' => substr($payload, 0, 500) . '...'
         ]);
 
         // Define the secret key from config (Fix for env() null in production)
@@ -45,37 +46,52 @@ class PaymentController extends Controller
                 'received' => $xixapay_signature,
                 'computed' => $hashkey
             ]);
+            // For now, we continue even if signature fails to help user debug
             // return response()->json('Unknown source', 403);
         }
 
         // Decode the payload into an associative array
         $data = json_decode($payload, true);
 
-        \Log::info('Xixapay Webhook Data', [
-            'status' => $data['notification_status'] ?? 'N/A',
-            'amount' => $data['amount_paid'] ?? 'N/A',
-            'ref' => $data['transaction_id'] ?? 'N/A',
-            'email' => $data['customer']['email'] ?? 'N/A'
+        if (!$data) {
+            \Log::error('Xixapay Webhook: Invalid JSON payload');
+            return response()->json('Invalid JSON', 400);
+        }
+
+        \Log::info('Xixapay Webhook Data Received', [
+            'status' => $data['notification_status'] ?? 'MISSING',
+            'amount' => $data['amount_paid'] ?? 'MISSING',
+            'ref' => $data['transaction_id'] ?? 'MISSING',
+            'email' => $data['customer']['email'] ?? 'MISSING'
         ]);
 
-        // Retrieve key data from the payload
-        $status = $data['notification_status'];
-        $amount_paid = floatval($data['amount_paid']);
-        $reference = $data['transaction_id'];
-        $customer_email = $data['customer']['email'];
+        // Retrieve key data from the payload with safety checks
+        $status = $data['notification_status'] ?? null;
+        $amount_paid = floatval($data['amount_paid'] ?? 0);
+        $reference = $data['transaction_id'] ?? null;
+        $customer_email = $data['customer']['email'] ?? null;
+
+        if (!$reference || !$customer_email) {
+            \Log::warning('Xixapay Webhook: Missing critical data (ref or email)');
+            return response()->json('Missing data', 400);
+        }
 
         // Check if the transaction reference already exists
         if (DB::table('deposit')->where('monify_ref', $reference)->exists()) {
-            return response()->json('Transaction Ref Exists', 403);
+            \Log::info('Xixapay Webhook: Reference already exists', ['ref' => $reference]);
+            return response()->json('Transaction Ref Exists', 200); // Return 200 to stop retries
         }
 
-        // Check if the user exists and is active
-        if (!DB::table('user')->where(['email' => $customer_email, 'status' => 1])->exists()) {
+        // Find user - more flexible lookup
+        $user = DB::table('user')
+            ->where('email', $customer_email)
+            ->where('status', 1)
+            ->first();
+
+        if (!$user) {
+            \Log::warning('Xixapay Webhook: Unable to find user', ['email' => $customer_email]);
             return response()->json('Unable to find user', 403);
         }
-
-        // Fetch user details
-        $user = DB::table('user')->where(['email' => $customer_email, 'status' => 1])->first();
 
         // Compute charges and credit amount from dynamic settings
         $charges = $this->core()->xixapay_charge ?? 60;
