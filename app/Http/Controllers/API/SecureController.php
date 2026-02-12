@@ -136,11 +136,24 @@ class SecureController extends Controller
     }
     public function DataLock(Request $request)
     {
+        \Log::info('🔒 DATA LOCK DEBUG - Request received', [
+            'request_id' => $request->id,
+            'all_data' => $request->all()
+        ]);
+
         if ($this->isValidOrigin($request)) {
+            \Log::info('🔒 DATA LOCK DEBUG - Origin validation passed');
+
             if (!empty($request->id)) {
                 $check_user = DB::table('user')->where(['status' => 1, 'id' => $this->verifytoken($request->id)])->where(function ($query) {
                     $query->where('type', 'ADMIN');
                 });
+
+                \Log::info('🔒 DATA LOCK DEBUG - User check', [
+                    'user_count' => $check_user->count(),
+                    'verified_id' => $this->verifytoken($request->id)
+                ]);
+
                 if ($check_user->count() > 0) {
                     // data sme
                     if ($request->mtn_sme == true || $request->mtn_sme == 1) {
@@ -298,6 +311,14 @@ class SecureController extends Controller
                     $this->updateData($glo_data, 'network', ['network' => 'GLO']);
                     $this->updateData($mobile_data, 'network', ['network' => '9MOBILE']);
                     $this->updateData($airtel_data, 'network', ['network' => 'AIRTEL']);
+
+                    \Log::info('🔒 DATA LOCK DEBUG - Updates completed', [
+                        'mtn' => $mtn_data,
+                        'glo' => $glo_data,
+                        'airtel' => $airtel_data,
+                        'mobile' => $mobile_data
+                    ]);
+
                     return response()->json([
                         'status' => 'success',
                         'message' => 'Updated'
