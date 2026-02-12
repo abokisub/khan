@@ -20,17 +20,22 @@ class Controller extends BaseController
     {
         $sets = DB::table('settings')->first();
         if ($sets) {
-            $cardSets = DB::table('card_settings')->where('id', 1)->first();
-            if ($cardSets) {
-                // Map DB snake_case fields to frontend expected vcard_* fields
-                $sets->vcard_ngn_fee = $cardSets->ngn_creation_fee;
-                $sets->vcard_usd_fee = $cardSets->usd_creation_fee;
-                $sets->vcard_usd_rate = $cardSets->ngn_rate;
-                $sets->vcard_fund_fee = $cardSets->funding_fee_percent; // Legacy
-                $sets->vcard_usd_failed_fee = $cardSets->usd_failed_tx_fee;
-                $sets->vcard_ngn_fund_fee = $cardSets->ngn_funding_fee_percent;
-                $sets->vcard_usd_fund_fee = $cardSets->usd_funding_fee_percent;
-                $sets->vcard_ngn_failed_fee = $cardSets->ngn_failed_tx_fee;
+            try {
+                $cardSets = DB::table('card_settings')->where('id', 1)->first();
+                if ($cardSets) {
+                    // Map DB snake_case fields to frontend expected vcard_* fields
+                    $sets->vcard_ngn_fee = $cardSets->ngn_creation_fee;
+                    $sets->vcard_usd_fee = $cardSets->usd_creation_fee;
+                    $sets->vcard_usd_rate = $cardSets->ngn_rate;
+                    $sets->vcard_fund_fee = $cardSets->funding_fee_percent; // Legacy
+                    $sets->vcard_usd_failed_fee = $cardSets->usd_failed_tx_fee;
+                    $sets->vcard_ngn_fund_fee = $cardSets->ngn_funding_fee_percent;
+                    $sets->vcard_usd_fund_fee = $cardSets->usd_funding_fee_percent;
+                    $sets->vcard_ngn_failed_fee = $cardSets->ngn_failed_tx_fee;
+                }
+            } catch (\Exception $e) {
+                // card_settings table doesn't exist yet, skip card settings
+                \Log::warning('card_settings table not found: ' . $e->getMessage());
             }
             return $sets;
         }
