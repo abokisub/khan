@@ -1,7 +1,0 @@
-/*! FixedColumns 4.1.0
-     * 2019-2022 SpryMedia Ltd - datatables.net/license
-     */
-
-/*! FixedColumns 4.1.0
- * 2019-2022 SpryMedia Ltd - datatables.net/license
- */
