@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
             AdminUserSeeder::class,
             FaqSeeder::class,
             SystemLocksSeeder::class,
+            NetworkSeeder::class,
         ]);
     }
 }
