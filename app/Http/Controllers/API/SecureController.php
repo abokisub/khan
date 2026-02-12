@@ -1578,16 +1578,16 @@ class SecureController extends Controller
                 });
                 if ($check_user->count() == 1) {
                     $data = [
-                        'habukhan1_username' => $request->habukhan1_username,
-                        'habukhan1_password' => $request->habukhan1_password,
-                        'habukhan2_username' => $request->habukhan2_username,
-                        'habukhan2_password' => $request->habukhan2_password,
-                        'habukhan3_username' => $request->habukhan3_username,
-                        'habukhan3_password' => $request->habukhan3_password,
-                        'habukhan4_username' => $request->habukhan4_username,
-                        'habukhan4_password' => $request->habukhan4_password,
-                        'habukhan5_username' => $request->habukhan5_username,
-                        'habukhan5_password' => $request->habukhan5_password
+                        'habukhan1_username' => $request->input('habukhan1_username', $request->Habukhan1_username),
+                        'habukhan1_password' => $request->input('habukhan1_password', $request->Habukhan1_password),
+                        'habukhan2_username' => $request->input('habukhan2_username', $request->Habukhan2_username),
+                        'habukhan2_password' => $request->input('habukhan2_password', $request->Habukhan2_password),
+                        'habukhan3_username' => $request->input('habukhan3_username', $request->Habukhan3_username),
+                        'habukhan3_password' => $request->input('habukhan3_password', $request->Habukhan3_password),
+                        'habukhan4_username' => $request->input('habukhan4_username', $request->Habukhan4_username),
+                        'habukhan4_password' => $request->input('habukhan4_password', $request->Habukhan4_password),
+                        'habukhan5_username' => $request->input('habukhan5_username', $request->Habukhan5_username),
+                        'habukhan5_password' => $request->input('habukhan5_password', $request->Habukhan5_password)
                     ];
                     $updated = DB::table('habukhan_api')->update($data);
                     if ($updated || $updated === 0) {
