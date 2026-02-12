@@ -244,13 +244,13 @@ export default function GeneralApp() {
           <Grid item xs={6} md={6} lg={3}><Appcakages image={<DataWifi />} displayname="Buy Data" link={PATH_DASHBOARD.general.buydata} /></Grid>
           <Grid item xs={6} md={6} lg={3}><Appcakages image={<AirtimeIcon />} displayname="Buy Airtime" link={PATH_DASHBOARD.general.buyairtime} /></Grid>
           <Grid item xs={6} md={6} lg={3}><Appcakages image={<AirtimeCashIcon />} displayname="Airtime 2 Cash" link={PATH_DASHBOARD.general.cash} /></Grid>
-          <Grid item xs={6} md={6} lg={3}><Appcakages image={<ElectricIcon />} displayname="Electricity Bill" link={PATH_DASHBOARD.general.buybill} /></Grid>
+          {Number(setting?.setting?.bill) === 1 && <Grid item xs={6} md={6} lg={3}><Appcakages image={<ElectricIcon />} displayname="Electricity Bill" link={PATH_DASHBOARD.general.buybill} /></Grid>}
           <Grid item xs={6} md={6} lg={3}><Appcakages image={<SmartIcon />} displayname="Cable Subscription" link={PATH_DASHBOARD.general.buycable} /></Grid>
-          <Grid item xs={6} md={6} lg={3}><Appcakages image={<TransferIcon />} displayname="Bonus Transfer" link={PATH_DASHBOARD.general.earning} /></Grid>
-          <Grid item xs={6} md={6} lg={3}><Appcakages image={<BulkSmsIcon />} displayname="Bulk SMS" link={PATH_DASHBOARD.general.bulksms} /></Grid>
+          {Number(setting?.setting?.referral) === 1 && <Grid item xs={6} md={6} lg={3}><Appcakages image={<TransferIcon />} displayname="Bonus Transfer" link={PATH_DASHBOARD.general.earning} /></Grid>}
+          {Number(setting?.setting?.bulksms) === 1 && <Grid item xs={6} md={6} lg={3}><Appcakages image={<BulkSmsIcon />} displayname="Bulk SMS" link={PATH_DASHBOARD.general.bulksms} /></Grid>}
           <Grid item xs={6} md={6} lg={3}><Appcakages image={<ResultCheck />} displayname="Result Checker" link={PATH_DASHBOARD.general.exam} /></Grid>
-          {setting?.setting?.data_card === 1 && <Grid item xs={6} md={6} lg={3}><Appcakages image={<DataCard />} displayname="Data Card Printing" link={PATH_DASHBOARD.general.data_card} /></Grid>}
-          {setting?.setting?.recharge_card === 1 && <Grid item xs={6} md={6} lg={3}><Appcakages image={<RechargeCard />} displayname="Recharge Card Printing" link={PATH_DASHBOARD.general.recharge_card} /></Grid>}
+          {Number(setting?.setting?.data_card) === 1 && <Grid item xs={6} md={6} lg={3}><Appcakages image={<DataCard />} displayname="Data Card Printing" link={PATH_DASHBOARD.general.data_card} /></Grid>}
+          {Number(setting?.setting?.recharge_card) === 1 && <Grid item xs={6} md={6} lg={3}><Appcakages image={<RechargeCard />} displayname="Recharge Card Printing" link={PATH_DASHBOARD.general.recharge_card} /></Grid>}
 
 
         </Grid>
