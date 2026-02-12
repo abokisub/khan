@@ -19,6 +19,6 @@
     RewriteCond %{REQUEST_FILENAME} -f
     RewriteRule ^ - [L]
 
-    # 3. Everything Else -> Send to Laravel (index.php)
-    RewriteRule ^ index.php [L]
+    # 3. Everything Else -> Send to React (index.html)
+    RewriteRule ^ index.html [L]
 </IfModule>
