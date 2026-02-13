@@ -1306,9 +1306,10 @@ class DataSend extends Controller
                 'mobileno' => $sendRequest->plan_phone,
                 'dataplan' => $dataplan->easyaccess,
                 'client_reference' => $data['transid'],
+                'max_amount_payable' => $sendRequest->amount,
             ];
 
-            $endpoint = "https://easyaccessapi.com.ng/api/live/v1/purchase-data";
+            $endpoint = "https://easyaccess.com.ng/api/live/v1/purchase-data";
             $response = ApiSending::EasyAccessApi($endpoint, $payload, $other_api->easy_access);
 
             if (!empty($response)) {

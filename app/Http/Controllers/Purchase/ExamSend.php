@@ -219,9 +219,10 @@ class ExamSend extends Controller
             $payload = [
                 'exam_board' => $exam_board,
                 'no_of_pins' => $sendRequest->quantity,
+                'max_amount_payable' => $sendRequest->amount,
             ];
 
-            $endpoint = "https://easyaccessapi.com.ng/api/live/v1/exam-pins";
+            $endpoint = "https://easyaccess.com.ng/api/live/v1/exam-pins";
             $response = ApiSending::EasyAccessApi($endpoint, $payload, $other_api->easy_access);
 
             if (!empty($response)) {
