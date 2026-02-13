@@ -1301,35 +1301,32 @@ class DataSend extends Controller
                 $the_network = 04;
             }
 
-            $curl = curl_init();
-            curl_setopt_array($curl, array(
-                CURLOPT_URL => "https://easyaccessapi.com.ng/api/data.php",
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_ENCODING => "",
-                CURLOPT_MAXREDIRS => 10,
-                CURLOPT_TIMEOUT => 0,
-                CURLOPT_FOLLOWLOCATION => true,
-                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-                CURLOPT_CUSTOMREQUEST => "POST",
-                CURLOPT_POSTFIELDS => array(
-                    'network' => $the_network,
-                    'mobileno' => $sendRequest->plan_phone,
-                    'dataplan' => $dataplan->easyaccess,
-                    'client_reference' => $data['transid'], //update this on your script to receive webhook notifications
-                ),
-                CURLOPT_HTTPHEADER => array(
-                    "AuthorizationToken: " . $other_api->easy_access, //replace this with your authorization_token
-                    "cache-control: no-cache"
-                ),
-            ));
-            $response = json_decode(curl_exec($curl), true);
-            curl_close($curl);
-            if ($response) {
-                if ($response['success'] == 'true') {
+            $payload = [
+                'network' => $the_network,
+                'mobileno' => $sendRequest->plan_phone,
+                'dataplan' => $dataplan->easyaccess,
+                'client_reference' => $data['transid'],
+            ];
+
+            $endpoint = "https://easyaccessapi.com.ng/api/live/v1/purchase-data";
+            $response = ApiSending::EasyAccessApi($endpoint, $payload, $other_api->easy_access);
+
+            if (!empty($response)) {
+                $status = $response['status'] ?? '';
+                $code = $response['code'] ?? 0;
+
+                if (
+                    $code == 200 ||
+                    $code == 201 ||
+                    strtolower($status) == 'success' ||
+                    strtolower($status) == 'successful'
+                ) {
                     return 'success';
                 } else {
                     return 'fail';
                 }
+            } else {
+                return 'fail';
             }
         } else {
             return 'fail';
@@ -1521,14 +1518,36 @@ class DataSend extends Controller
             $response = ApiSending::BoltNetApi($endpoint_details, $payload);
 
             if (!empty($response)) {
-                if (isset($response['response']['Status']) && $response['response']['Status'] == 'successful') {
-                    if (isset($response['response']['api_response'])) {
-                        DB::table('data')->where(['username' => $data['username'], 'transid' => $data['transid']])->update(['api_response' => $response['response']['api_response']]);
+                // BoltNet response is usually a flat object, but some older versions or failovers might nest it.
+                $responseData = $response['response'] ?? $response;
+
+                $status = $responseData['Status'] ?? $responseData['status'] ?? '';
+                $message = $responseData['message'] ?? $responseData['Message'] ?? '';
+
+                $statusLower = strtolower($status);
+                $messageLower = strtolower($message);
+
+                \Log::info('BoltNet Decision (Data):', [
+                    'status' => $status,
+                    'statusLower' => $statusLower,
+                    'matches' => ($statusLower == 'successful' || $statusLower == 'success' || $statusLower == 'completed')
+                ]);
+
+                if (
+                    $statusLower == 'successful' ||
+                    $statusLower == 'success' ||
+                    $statusLower == 'completed' ||
+                    $messageLower == 'successful' ||
+                    $messageLower == 'success' ||
+                    (isset($responseData['code']) && $responseData['code'] == 200)
+                ) {
+                    if (isset($responseData['api_response'])) {
+                        DB::table('data')->where(['username' => $data['username'], 'transid' => $data['transid']])->update(['api_response' => $responseData['api_response']]);
                     }
                     return 'success';
                 } else {
-                    if (isset($response['response']['api_response'])) {
-                        DB::table('data')->where(['username' => $data['username'], 'transid' => $data['transid']])->update(['api_response' => $response['response']['api_response']]);
+                    if (isset($responseData['api_response'])) {
+                        DB::table('data')->where(['username' => $data['username'], 'transid' => $data['transid']])->update(['api_response' => $responseData['api_response']]);
                     }
                     return 'fail';
                 }

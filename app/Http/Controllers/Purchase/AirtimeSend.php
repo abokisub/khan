@@ -1076,7 +1076,17 @@ class AirtimeSend extends Controller
                 'amount' => $sendRequest->amount,
                 'mobile_number' => $sendRequest->plan_phone,
                 'Ported_number' => true,
-                'airtime_type' => 'VTU'
+            ];
+
+            // BoltNet airtime type from database (default to VTU if not specified)
+            $airtime_type = $sendRequest->network_type ?? $sendRequest->type ?? 'VTU';
+
+            $payload = [
+                'network' => $network_id,
+                'amount' => $sendRequest->amount,
+                'mobile_number' => $sendRequest->plan_phone,
+                'Ported_number' => true,
+                'airtime_type' => $airtime_type
             ];
 
             $base_url = rtrim($web_api->boltnet_url ?? 'https://boltnet.com.ng', '/');
@@ -1091,7 +1101,7 @@ class AirtimeSend extends Controller
             \Log::info('BoltNet Airtime Response:', ['response' => $response]);
 
             if (!empty($response)) {
-                // BoltNet response is already nested in ['response']
+                // BoltNet response is usually a flat object, but handle nested case for robustness
                 $responseData = $response['response'] ?? $response;
 
                 $status = $responseData['Status'] ?? $responseData['status'] ?? '';
@@ -1104,29 +1114,25 @@ class AirtimeSend extends Controller
                 \Log::info('BoltNet Decision:', [
                     'status' => $status,
                     'statusLower' => $statusLower,
-                    'matches' => ($statusLower == 'successful')
+                    'matches' => ($statusLower == 'successful' || $statusLower == 'success' || $statusLower == 'completed')
                 ]);
 
                 if (
-                $statusLower == 'successful' ||
-                $statusLower == 'success' ||
-                $statusLower == 'completed' ||
-                $messageLower == 'successful' ||
-                $messageLower == 'success' ||
-                (isset($response['response']['code']) && $response['response']['code'] == 200)
+                    $statusLower == 'successful' ||
+                    $statusLower == 'success' ||
+                    $statusLower == 'completed' ||
+                    $messageLower == 'successful' ||
+                    $messageLower == 'success' ||
+                    (isset($responseData['code']) && $responseData['code'] == 200)
                 ) {
                     return 'success';
-                }
-                else {
+                } else {
                     return 'fail';
                 }
-            }
-            else {
+            } else {
                 return 'fail';
             }
         }
         else {
-            return 'fail';
-        }
     }
 }

@@ -2673,15 +2673,19 @@ class AdminController extends Controller
                 });
                 if ($check_user->count() > 0) {
                     $search = strtolower($request->search);
+                    $perPage = $request->input('adex', $request->input('habukhan', 10));
+                    if (!is_numeric($perPage) || $perPage <= 0)
+                        $perPage = 10;
+
                     if (!empty($search)) {
                         return response()->json([
                             'autobank' => DB::table('user')->where('autofund', 'ACTIVE')->select('id', 'username', 'profile_image', 'wema', 'kolomoni_mfb', 'sterlen', 'fed', 'bal', 'refbal', 'status')->orderBy('id', 'desc')->where(function ($query) use ($search) {
                                 $query->orWhere('username', 'LIKE', "%$search%")->orWhere('name', 'LIKE', "%$search%")->orWhere('email', 'LIKE', "%$search%")->orWhere('date', 'LIKE', "%$search%")->orWhere('phone', 'LIKE', "%$search%")->orWhere('pin', 'LIKE', "%$search%")->orWhere('type', 'LIKE', "%$search%");
-                            })->paginate($request->adex),
+                            })->paginate($perPage),
                         ]);
                     } else {
                         return response()->json([
-                            'autobank' => DB::table('user')->where('autofund', 'ACTIVE')->select('id', 'username', 'profile_image', 'wema', 'kolomoni_mfb', 'sterlen', 'fed', 'bal', 'refbal', 'status')->orderBy('id', 'desc')->paginate($request->adex),
+                            'autobank' => DB::table('user')->where('autofund', 'ACTIVE')->select('id', 'username', 'profile_image', 'wema', 'kolomoni_mfb', 'sterlen', 'fed', 'bal', 'refbal', 'status')->orderBy('id', 'desc')->paginate($perPage),
                         ]);
                     }
                 } else {
@@ -2707,15 +2711,19 @@ class AdminController extends Controller
                 });
                 if ($check_user->count() > 0) {
                     $search = strtolower($request->search);
+                    $perPage = $request->input('adex', $request->input('habukhan', 10));
+                    if (!is_numeric($perPage) || $perPage <= 0)
+                        $perPage = 10;
+
                     if (!empty($search)) {
                         return response()->json([
                             'userbank' => DB::table('user_bank')->where(function ($query) use ($search) {
                                 $query->orWhere('username', 'LIKE', "%$search%");
-                            })->orderBy('id', 'desc')->paginate($request->adex)
+                            })->orderBy('id', 'desc')->paginate($perPage)
                         ]);
                     } else {
                         return response()->json([
-                            'userbank' => DB::table('user_bank')->orderBy('id', 'desc')->paginate($request->adex)
+                            'userbank' => DB::table('user_bank')->orderBy('id', 'desc')->paginate($perPage)
                         ]);
                     }
                 } else {

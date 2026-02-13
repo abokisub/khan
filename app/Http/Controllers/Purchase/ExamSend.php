@@ -204,55 +204,48 @@ class ExamSend extends Controller
     {
         if (DB::table('exam')->where(['username' => $data['username'], 'transid' => $data['transid']])->count() == 1) {
             $sendRequest = DB::table('exam')->where(['username' => $data['username'], 'transid' => $data['transid']])->first();
-            $habukhan_api = DB::table('other_api')->first();
-            $paypload = array(
-                'no_of_pins' => $sendRequest->quantity,
-            );
-            if ($sendRequest->exam_name == 'WAEC') {
-                $endpoints = "https://easyaccessapi.com.ng/api/waec_v2.php";
-            } else if ($sendRequest->exam_name == 'NECO') {
-                $endpoints = "https://easyaccessapi.com.ng/api/neco_v2.php";
+            $other_api = DB::table('other_api')->first();
+
+            // Map exam name to EasyAccess board ID
+            $exam_board = 1; // Default to WAEC
+            if ($sendRequest->exam_name == 'NECO') {
+                $exam_board = 2;
             } else if ($sendRequest->exam_name == 'NABTEB') {
-                $endpoints = "https://easyaccessapi.com.ng/api/nabteb_v2.php";
+                $exam_board = 3;
+            } else if ($sendRequest->exam_name == 'NBAIS') {
+                $exam_board = 4;
             }
-            $curl = curl_init();
-            curl_setopt_array($curl, array(
-                CURLOPT_URL => $endpoints,
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_ENCODING => "",
-                CURLOPT_MAXREDIRS => 10,
-                CURLOPT_TIMEOUT => 0,
-                CURLOPT_FOLLOWLOCATION => true,
-                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-                CURLOPT_CUSTOMREQUEST => "POST",
-                CURLOPT_POSTFIELDS => $paypload,
-                CURLOPT_HTTPHEADER => array(
-                    "AuthorizationToken: " . $habukhan_api->easy_access,
-                    "cache-control: no-cache"
-                ),
-            ));
-            $dataapi = curl_exec($curl);
-            $response = json_decode($dataapi, true);
-            if ($response) {
-                if (isset($response['status'])) {
-                    if ($response['status'] == 'true') {
-                        if ($sendRequest->quantity == 1) {
-                            $pin = $response['pin'];
-                        } else if ($sendRequest->quantity == 2) {
-                            $pin = "pin1 => " . $response['pin'] . " pin2 => " . $response['pin2'];
-                        } else if ($sendRequest->quantity == 3) {
-                            $pin = "pin1 => " . $response['pin'] . " pin2 => " . $response['pin2'] . " pin3 => " . $response['pin3'];
-                        } else if ($sendRequest->quantity == 4) {
-                            $pin = "pin1 => " . $response['pin'] . " pin2 => " . $response['pin2'] . " pin3 => " . $response['pin3'] . " pin4 => " . $response['pin4'];
-                        } else if ($sendRequest->quantity == 5) {
-                            $pin = "pin1 => " . $response['pin'] . " pin2 => " . $response['pin2'] . " pin3 => " . $response['pin3'] . " pin4 => " . $response['pin4'] . " pin5 => " . $response['pin5'];
-                        } else {
-                            $pin = "pin1 => " . $response['pin'] . " pin2 => " . $response['pin2'] . " pin3 => " . $response['pin3'] . " pin4 => " . $response['pin4'] . " pin5 => " . $response['pin5'];
-                        }
-                        DB::table('exam')->where(['username' => $data['username'], 'transid' => $data['transid']])->update(['purchase_code' => $pin]);
+
+            $payload = [
+                'exam_board' => $exam_board,
+                'no_of_pins' => $sendRequest->quantity,
+            ];
+
+            $endpoint = "https://easyaccessapi.com.ng/api/live/v1/exam-pins";
+            $response = ApiSending::EasyAccessApi($endpoint, $payload, $other_api->easy_access);
+
+            if (!empty($response)) {
+                $status = $response['status'] ?? '';
+                $code = $response['code'] ?? 0;
+
+                if (
+                    $code == 200 ||
+                    $code == 201 ||
+                    strtolower($status) == 'success' ||
+                    strtolower($status) == 'successful'
+                ) {
+                    // Handle pins array from V1 response
+                    if (isset($response['pins']) && is_array($response['pins'])) {
+                        $pin = implode(', ', $response['pins']);
+                    } else if (isset($response['pin'])) {
+                        // Fallback for unexpected single pin format
+                        $pin = $response['pin'];
                     } else {
-                        return 'fail';
+                        $pin = "Processed (See Reference: " . ($response['reference'] ?? 'N/A') . ")";
                     }
+
+                    DB::table('exam')->where(['username' => $data['username'], 'transid' => $data['transid']])->update(['purchase_code' => $pin]);
+                    return 'success';
                 } else {
                     return 'fail';
                 }

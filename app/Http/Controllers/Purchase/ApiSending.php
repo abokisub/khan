@@ -191,6 +191,27 @@ class ApiSending extends Controller
         return json_decode($result, true);
     }
 
+    public static function EasyAccessApi($endpoint, $payload, $token)
+    {
+        \Log::info('EasyAccess API Request:', ['url' => $endpoint, 'payload' => $payload]);
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $endpoint);
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        $headers = [
+            "Authorization: Bearer " . $token,
+            "Cache-Control: no-cache",
+            'Content-Type: application/json'
+        ];
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        $dataapi = curl_exec($ch);
+        curl_close($ch);
+        $response = json_decode($dataapi, true);
+        \Log::info('EasyAccess API Response:', ['response' => $response]);
+        return $response;
+    }
+
     public static function OTHERAPI($endpoint, $payload, $headers)
     {
         $ch = curl_init();
