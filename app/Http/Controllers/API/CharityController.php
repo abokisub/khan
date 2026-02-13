@@ -290,15 +290,14 @@ class CharityController extends Controller
 
         $campaigns = $query->paginate($request->limit ?? 10);
 
-        $campaigns->getCollection()->transform(function ($campaign) {
+        foreach ($campaigns as $campaign) {
             $campaign->logo_url = $campaign->logo ? url($campaign->logo) : null;
             $campaign->image_url = $campaign->image ? url($campaign->image) : null;
             // Calculate percentage
             $campaign->percentage = $campaign->target_amount > 0
                 ? min(100, round(($campaign->current_amount / $campaign->target_amount) * 100))
                 : 0;
-            return $campaign;
-        });
+        }
 
         return response()->json([
             'status' => 200,
@@ -352,12 +351,12 @@ class CharityController extends Controller
             $query->where('name', 'LIKE', '%' . $request->search . '%')
                 ->orWhere('username', 'LIKE', '%' . $request->search . '%');
         }
-        $charities = $query->orderBy('id', 'desc')->paginate($request->limit ?? 10);
+        $charities = $query->orderBy('id', 'desc')
+            ->paginate($request->limit ?? 10);
 
-        $charities->getCollection()->transform(function ($charity) {
+        foreach ($charities as $charity) {
             $charity->logo_url = $charity->logo ? url($charity->logo) : null;
-            return $charity;
-        });
+        }
 
         return response()->json([
             'status' => 200,
@@ -409,10 +408,9 @@ class CharityController extends Controller
                 ->orderBy('donations.id', 'desc')
                 ->paginate($request->limit ?? 10);
 
-            $donations->getCollection()->transform(function ($donation) {
+            foreach ($donations as $donation) {
                 $donation->date_formatted = Carbon::parse($donation->created_at)->format('d M Y, h:i A');
-                return $donation;
-            });
+            }
 
             return response()->json([
                 'status' => 200,

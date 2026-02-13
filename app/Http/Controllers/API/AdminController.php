@@ -2642,12 +2642,11 @@ class AdminController extends Controller
                         ->orderBy('id', 'desc')
                         ->paginate($request->input('habukhan', 15));
 
-                    $users->getCollection()->transform(function ($u) {
+                    foreach ($users as $u) {
                         // Cast status and kyc to integers for frontend compatibility (Fixes "Unknown" status display)
                         $u->status = (int) $u->status;
                         $u->kyc = (int) $u->kyc;
-                        return $u;
-                    });
+                    }
 
                     return response()->json(['all_users' => $users]);
                 } else {

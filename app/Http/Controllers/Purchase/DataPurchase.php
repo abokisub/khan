@@ -441,7 +441,7 @@ class DataPurchase extends Controller
                                                                                                     } else {
                                                                                                         $message = "You have been gifted " . $plan_d->plan_name . $plan_d->plan_size;
                                                                                                     }
-                                                                                                    $receiptService = new \App\Services\ReceiptService();
+                                                                                                    $receiptService = new ReceiptService();
                                                                                                     $successMessage = $receiptService->getFullMessage('DATA', [
                                                                                                         'plan' => $plan_d->plan_name . $plan_d->plan_size,
                                                                                                         'recipient' => $phone,

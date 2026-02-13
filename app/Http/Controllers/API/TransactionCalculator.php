@@ -1092,14 +1092,16 @@ class TransactionCalculator extends Controller
                                 return response()->json(['status' => 'success', 'data' => []]);
                         }
 
-                        $transactions = $query->orderBy('habukhan_date', 'desc')->paginate(50);
+                        $transactions = $query->orderBy('habukhan_date', 'desc')
+                            ->paginate(50);
 
-                        $transactions->getCollection()->transform(function ($tx) {
+                        $data = [];
+                        foreach ($transactions as $tx) {
                             $cat = 'Others';
                             $icon = 'more_horiz';
                             $color = '0xFF6B7280';
 
-                            // Reuse the mapping logic from line 2010 approx
+                            // Reuse the mapping logic
                             if (strpos($tx->message, 'Transfer to') !== false || $tx->role == 'transfer_sent') {
                                 $cat = 'Wallet Transfer';
                                 $icon = 'wallet';
@@ -1138,7 +1140,7 @@ class TransactionCalculator extends Controller
                                 $color = '0xFF6366F1';
                             }
 
-                            return [
+                            $data[] = [
                                 'id' => $tx->transid,
                                 'title' => $cat,
                                 'subtitle' => $tx->message,
@@ -1148,11 +1150,11 @@ class TransactionCalculator extends Controller
                                 'icon' => $icon,
                                 'color' => $color
                             ];
-                        });
+                        }
 
                         return response()->json([
                             'status' => 'success',
-                            'data' => $transactions->items(),
+                            'data' => $data,
                             'current_page' => $transactions->currentPage(),
                             'last_page' => $transactions->lastPage()
                         ]);
