@@ -953,14 +953,6 @@ class AirtimeSend extends Controller
             // BoltNet Network ID from database
             $network_id = $network_d->boltnet_id ?? 1;
 
-            $payload = [
-                'network' => $network_id,
-                'amount' => $sendRequest->amount,
-                'mobile_number' => $sendRequest->plan_phone,
-                'Ported_number' => true,
-            ];
-
-            // BoltNet airtime type from database (default to VTU if not specified)
             $airtime_type = $sendRequest->network_type ?? $sendRequest->type ?? 'VTU';
 
             $payload = [
@@ -992,20 +984,31 @@ class AirtimeSend extends Controller
                 // Handle various BoltNet success indicators (case-insensitive)
                 $statusLower = strtolower($status);
                 $messageLower = strtolower($message);
+                $apiResponse = $responseData['api_response'] ?? $responseData['ApiResponse'] ?? '';
+                $apiResponseLower = strtolower($apiResponse);
 
-                \Log::info('BoltNet Decision:', [
+                \Log::info('BoltNet Decision (Airtime):', [
                     'status' => $status,
                     'statusLower' => $statusLower,
-                    'matches' => ($statusLower == 'successful' || $statusLower == 'success' || $statusLower == 'completed')
+                    'messageLower' => $messageLower,
+                    'apiResponseLower' => $apiResponseLower,
+                    'matches' => ($statusLower == 'successful' || $statusLower == 'success' || $statusLower == 'completed' || $statusLower == 'processing' || $statusLower == 'process')
                 ]);
 
                 if (
                     $statusLower == 'successful' ||
                     $statusLower == 'success' ||
                     $statusLower == 'completed' ||
+                    $statusLower == 'processing' ||
+                    $statusLower == 'process' ||
                     $messageLower == 'successful' ||
                     $messageLower == 'success' ||
-                    (isset($responseData['code']) && $responseData['code'] == 200)
+                    $messageLower == 'processing' ||
+                    $messageLower == 'process' ||
+                    $apiResponseLower == 'successful' ||
+                    $apiResponseLower == 'success' ||
+                    strpos($apiResponseLower, 'successful') !== false ||
+                    (isset($responseData['code']) && ($responseData['code'] == 200 || $responseData['code'] == 201))
                 ) {
                     return 'success';
                 } else {

@@ -1526,20 +1526,31 @@ class DataSend extends Controller
 
                 $statusLower = strtolower($status);
                 $messageLower = strtolower($message);
+                $apiResponse = $responseData['api_response'] ?? $responseData['ApiResponse'] ?? '';
+                $apiResponseLower = strtolower($apiResponse);
 
                 \Log::info('BoltNet Decision (Data):', [
                     'status' => $status,
                     'statusLower' => $statusLower,
-                    'matches' => ($statusLower == 'successful' || $statusLower == 'success' || $statusLower == 'completed')
+                    'messageLower' => $messageLower,
+                    'apiResponseLower' => $apiResponseLower,
+                    'matches' => ($statusLower == 'successful' || $statusLower == 'success' || $statusLower == 'completed' || $statusLower == 'processing' || $statusLower == 'process')
                 ]);
 
                 if (
                     $statusLower == 'successful' ||
                     $statusLower == 'success' ||
                     $statusLower == 'completed' ||
+                    $statusLower == 'processing' ||
+                    $statusLower == 'process' ||
                     $messageLower == 'successful' ||
                     $messageLower == 'success' ||
-                    (isset($responseData['code']) && $responseData['code'] == 200)
+                    $messageLower == 'processing' ||
+                    $messageLower == 'process' ||
+                    $apiResponseLower == 'successful' ||
+                    $apiResponseLower == 'success' ||
+                    strpos($apiResponseLower, 'successful') !== false ||
+                    (isset($responseData['code']) && ($responseData['code'] == 200 || $responseData['code'] == 201))
                 ) {
                     if (isset($responseData['api_response'])) {
                         DB::table('data')->where(['username' => $data['username'], 'transid' => $data['transid']])->update(['api_response' => $responseData['api_response']]);
